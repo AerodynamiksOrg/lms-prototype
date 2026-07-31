@@ -574,12 +574,69 @@ const INSTRUCTORS = [
   { n:"Anjali Deshmukh",    i:"AD", c:"#0F7A45", hours:"18:45", classes:13, batches:1 }
 ];
 
+/* Every figure on the Admin screen is derived from this table, so any
+   combination of filters still adds up. reports/hours are per date range. */
 const BATCHES = [
-  { name:"NITTE 1st Batch 2025-26", prog:"CPL Ground School",      cadets:18, syll:64, att:91, last:"31 Jul 2026", state:"ok"   },
-  { name:"Nitte 2nd Batch 26-27",   prog:"CPL Ground School",      cadets:16, syll:38, att:86, last:"31 Jul 2026", state:"ok"   },
-  { name:"Cabin Crew Batch 03",     prog:"Cabin Crew",             cadets:14, syll:52, att:79, last:"29 Jul 2026", state:"warn" },
-  { name:"Ground Services 02",      prog:"Airport Ground Services",cadets:11, syll:22, att:74, last:"24 Jul 2026", state:"late" }
+  { id:"b1", name:"NITTE 1st Batch 2025-26", prog:"CPL Ground School", cadets:18, att:91, last:"31 Jul 2026",
+    reports:{month:22,d30:24,m3:63}, hours:{month:31.5,d30:34.0,m3:92.5},
+    subjects:[ {n:"Air Navigation",c:"#E31E24",d:300,t:441},{n:"Aviation Meteorology",c:"#F0A830",d:121,t:168},
+               {n:"Technical General",c:"#7A4A2B",d:71,t:151},{n:"Regulations",c:"#0F7A45",d:42,t:75} ] },
+
+  { id:"b2", name:"Nitte 2nd Batch 26-27", prog:"CPL Ground School", cadets:16, att:86, last:"31 Jul 2026",
+    reports:{month:19,d30:21,m3:48}, hours:{month:27.0,d30:29.5,m3:70.0},
+    subjects:[ {n:"Air Navigation",c:"#E31E24",d:168,t:441},{n:"Aviation Meteorology",c:"#F0A830",d:79,t:168},
+               {n:"Technical General",c:"#7A4A2B",d:42,t:151},{n:"Regulations",c:"#0F7A45",d:28,t:75} ] },
+
+  { id:"b3", name:"Cabin Crew Batch 03", prog:"Cabin Crew", cadets:14, att:79, last:"29 Jul 2026",
+    reports:{month:13,d30:14,m3:35}, hours:{month:19.0,d30:21.0,m3:52.0},
+    subjects:[ {n:"Cabin Safety & Emergency",c:"#E31E24",d:62,t:104},{n:"In-Flight Service",c:"#F0A830",d:44,t:78},
+               {n:"Aviation Medicine",c:"#7A4A2B",d:38,t:71},{n:"Grooming & Conduct",c:"#0F7A45",d:22,t:67} ] },
+
+  { id:"b4", name:"Ground Services 02", prog:"Airport Ground Services", cadets:11, att:74, last:"24 Jul 2026",
+    reports:{month:7,d30:8,m3:24}, hours:{month:10.0,d30:12.0,m3:34.0},
+    subjects:[ {n:"Passenger Handling",c:"#E31E24",d:24,t:88},{n:"Ramp Safety",c:"#F0A830",d:16,t:62},
+               {n:"Cargo & Load Control",c:"#7A4A2B",d:12,t:58},{n:"Airport Regulations",c:"#0F7A45",d:5,t:52} ] }
 ];
+
+/* Who teaches what — hours and classes over the last 30 days */
+const INSTR_LOAD = [
+  {i:"MB", b:"b1", h:20.0, c:14}, {i:"RP", b:"b1", h:14.0, c:10},
+  {i:"MB", b:"b2", h:15.5, c:11}, {i:"RP", b:"b2", h:14.0, c:10},
+  {i:"RP", b:"b3", h: 8.25,c: 5}, {i:"AD", b:"b3", h:12.75,c: 9},
+  {i:"MB", b:"b4", h: 6.0, c: 4}, {i:"AD", b:"b4", h: 6.0, c: 4}
+];
+
+const ALERTS = [
+  { b:"b4", i:"AD", kind:"late", title:"2 classes not reported",
+    desc:"Ground Services 02 — 29 &amp; 30 Jul. Same-day reporting is the adoption target.", remind:"Anjali Deshmukh" },
+  { b:"b2", i:"RP", kind:"warn", title:"2 cadets below 75% attendance",
+    desc:"Saanvi Deshpande (63%) and Vivaan Rathore (72%) in Nitte 2nd Batch." },
+  { b:"b1", i:"MB", kind:"warn", title:"1 cadet below 75% attendance",
+    desc:"Kabir Sethi (68%) in NITTE 1st Batch 2025-26." },
+  { b:"b4", i:"AD", kind:"warn", title:"Ground Services 02 is behind plan",
+    desc:"22% of syllabus covered against 41% scheduled for this point in the term." },
+  { b:"b3", i:"RP", kind:"warn", title:"Cabin Crew 03 attendance slipping",
+    desc:"79% this month, down from 84% in the previous period." },
+  { b:"b2", i:"MB", kind:"info", title:"1 report awaiting correction",
+    desc:"VOR · Nitte 2nd Batch · attendance query raised. Admin-only edit, fully audited." }
+];
+
+const FEED = [
+  { b:"b2", i:"MB", ic:"report",  tone:"brand", t:"<b>Manthan Bhanushali</b> filed a class report — VOR · Nitte 2nd Batch", tm:"12 minutes ago" },
+  { b:"b3", i:"RP", ic:"users",   tone:"ok",    t:"<b>Rinkesh Punjwani</b> marked attendance 12 of 14 — Cabin Safety drill", tm:"1 hour ago" },
+  { b:"b1", i:"MB", ic:"alertLg", tone:"warn",  t:"Attendance corrected for <b>Aarav Mehta</b> — new audited entry, original retained", tm:"3 hours ago" },
+  { b:"b1", i:"MB", ic:"book",    tone:"info",  t:"<b>4 documents</b> added to CAE Oxford — visible to all assigned batches", tm:"5 hours ago" },
+  { b:"b2", i:"RP", ic:"report",  tone:"brand", t:"<b>Rinkesh Punjwani</b> filed a class report — Density · Nitte 2nd Batch", tm:"Yesterday, 17:05" },
+  { b:"b1", i:"MB", ic:"plus",    tone:"idle",  t:"<b>Priya Malhotra</b> admitted to NITTE 1st Batch 2025-26", tm:"Yesterday, 16:20" },
+  { b:"b4", i:"AD", ic:"alertLg", tone:"late",  t:"<b>Ground Services 02</b> — no class report filed for 30 Jul", tm:"Yesterday, 21:00" }
+];
+
+const PROGRAMMES = ["CPL Ground School","Cabin Crew","Airport Ground Services"];
+const RANGES = { month:"This month", d30:"30 days", m3:"3 months", custom:"Custom" };
+const RANGE_LABEL = { month:"July 2026", d30:"the last 30 days", m3:"the last 3 months", custom:"01 May – 31 Jul 2026" };
+const rkey = r => r==="custom" ? "m3" : r;
+const byId = id => BATCHES.find(b=>b.id===id);
+const fmtH = d => { const h=Math.floor(d+1e-9), m=Math.round((d-h)*60); return `${h}:${String(m).padStart(2,'0')}`; };
 
 const CADETS = [
   { n:"Aarav Mehta",       i:"AM", c:"#E31E24", b:"NITTE 1st Batch 2025-26", att:96, prog:71, due:"04 Aug", dueState:"ok",   flag:null },
@@ -794,19 +851,98 @@ function renderNav(role){
 /* =====================================================================
    ADMIN DASHBOARD
    ===================================================================== */
+/* ---- Admin filter state + derived figures ---- */
+const AF = { range:"d30", prog:"all", batch:"all", instr:"all" };
+const syll = b => Math.round(b.subjects.reduce((s,x)=>s+x.d,0)/b.subjects.reduce((s,x)=>s+x.t,0)*100);
+
+function computeAdmin(){
+  const rk = rkey(AF.range);
+
+  let batches = BATCHES.filter(b => AF.prog==="all" || b.prog===AF.prog);
+  if(AF.batch!=="all") batches = batches.filter(b=>b.id===AF.batch);
+  if(AF.instr!=="all") batches = batches.filter(b=>INSTR_LOAD.some(l=>l.i===AF.instr && l.b===b.id));
+
+  const ids = batches.map(b=>b.id);
+  let load = INSTR_LOAD.filter(l=>ids.includes(l.b));
+  if(AF.instr!=="all") load = load.filter(l=>l.i===AF.instr);
+
+  // range scaling, derived from each batch's own totals so nothing drifts
+  const hS = b => b.hours[rk]/b.hours.d30;
+  const rS = b => b.reports[rk]/b.reports.d30;
+
+  const hours   = AF.instr==="all" ? batches.reduce((s,b)=>s+b.hours[rk],0)
+                                   : load.reduce((s,l)=>s+l.h*hS(byId(l.b)),0);
+  const reports = AF.instr==="all" ? batches.reduce((s,b)=>s+b.reports[rk],0)
+                                   : Math.round(load.reduce((s,l)=>s+l.c*rS(byId(l.b)),0));
+  const cadets  = batches.reduce((s,b)=>s+b.cadets,0);
+  const att     = cadets ? Math.round(batches.reduce((s,b)=>s+b.att*b.cadets,0)/cadets) : 0;
+  const done    = batches.reduce((s,b)=>s+b.subjects.reduce((a,x)=>a+x.d,0),0);
+  const total   = batches.reduce((s,b)=>s+b.subjects.reduce((a,x)=>a+x.t,0),0);
+  const comp    = total ? Math.round(done/total*100) : 0;
+
+  // subjects aggregated by name across the selected batches
+  const map = new Map();
+  batches.forEach(b=>b.subjects.forEach(x=>{
+    const e = map.get(x.n) || {n:x.n, c:x.c, d:0, t:0};
+    e.d+=x.d; e.t+=x.t; map.set(x.n, e);
+  }));
+  const subjects = [...map.values()].sort((a,b)=>(b.d/b.t)-(a.d/a.t));
+
+  // instructor rows
+  const iMap = new Map();
+  load.forEach(l=>{
+    const who = INSTRUCTORS.find(t=>t.i===l.i);
+    const e = iMap.get(l.i) || {n:who.n, i:l.i, c:who.c, hours:0, classes:0, batches:new Set()};
+    e.hours += l.h*hS(byId(l.b));
+    e.classes += Math.round(l.c*rS(byId(l.b)));
+    e.batches.add(l.b); iMap.set(l.i, e);
+  });
+  const instr = [...iMap.values()].sort((a,b)=>b.hours-a.hours);
+  const instrMax = instr.reduce((s,x)=>s+x.hours,0) || 1;
+
+  const alerts = ALERTS.filter(a=>ids.includes(a.b) && (AF.instr==="all"||a.i===AF.instr));
+  const feed   = FEED.filter(f=>ids.includes(f.b) && (AF.instr==="all"||f.i===AF.instr));
+
+  // attendance trend ending on the computed average
+  const trend = [-6,-4,-5,-2,-3,0,-1,0].map(d=>Math.max(70,Math.min(100, att+d)));
+  const share = BATCHES.reduce((s,b)=>s+b.hours.d30,0);
+  const wk = (AF.instr==="all" ? batches.reduce((s,b)=>s+b.hours.d30,0)
+                               : load.reduce((s,l)=>s+l.h,0)) / share;
+
+  return {batches, load, hours, reports, cadets, att, done, total, comp,
+          subjects, instr, instrMax, alerts, feed, trend, wk, rk};
+}
+
+function setAF(k,v){ AF[k]=v; if(k==="prog") AF.batch="all"; renderAdmin(); }
+function resetAF(){ AF.range="d30"; AF.prog="all"; AF.batch="all"; AF.instr="all";
+  renderAdmin(); toast('Filters reset','Showing the last 30 days, all batches.'); }
+function renderAdmin(){ const v=document.getElementById('view'); v.innerHTML=adminView(); }
+
 function adminView(){
+  const A = computeAdmin();
+  const prev = x => Math.round(x*0.85);
   const kpis = [
-    {lab:"Class reports filed", val:"67",   unit:"", d:"+12", dir:"up",   bg:"var(--brand-050)", fg:"var(--brand)", ic:I.report, spark:[41,44,48,52,55,60,63,67], sc:"#E31E24"},
-    {lab:"Teaching hours",      val:"96:30",unit:"", d:"+8:15",dir:"up",  bg:"var(--gold-050)",  fg:"#B26A00",      ic:I.clock,  spark:[62,68,73,79,84,89,93,96], sc:"#F0A830"},
-    {lab:"Average attendance",  val:"88",   unit:"%",d:"+2.4", dir:"up",  bg:"var(--ok-bg)",     fg:"var(--ok)",    ic:I.users,  spark:ATT_TREND,                 sc:"#0F7A45"},
-    {lab:"Syllabus completion", val:"48",   unit:"%",d:"−1.1", dir:"down",bg:"var(--info-bg)",   fg:"var(--info)",  ic:I.chart,  spark:[38,40,43,45,46,48,49,48], sc:"#7A4A2B"}
+    {lab:"Class reports filed", val:String(A.reports), unit:"",
+     d:"+"+(A.reports-prev(A.reports)), dir:"up", bg:"var(--brand-050)", fg:"var(--brand)", ic:I.report,
+     spark:[.61,.66,.72,.78,.82,.89,.94,1].map(f=>Math.round(A.reports*f)), sc:"#E31E24"},
+    {lab:"Teaching hours", val:fmtH(A.hours), unit:"",
+     d:"+"+fmtH(A.hours-prev(A.hours)), dir:"up", bg:"var(--gold-050)", fg:"#B26A00", ic:I.clock,
+     spark:[.64,.70,.76,.82,.87,.92,.96,1].map(f=>Math.round(A.hours*f)), sc:"#F0A830"},
+    {lab:"Average attendance", val:String(A.att), unit:"%",
+     d:"+2.4", dir:"up", bg:"var(--ok-bg)", fg:"var(--ok)", ic:I.users, spark:A.trend, sc:"#0F7A45"},
+    {lab:"Syllabus completion", val:String(A.comp), unit:"%",
+     d:"−1.1", dir:"down", bg:"var(--info-bg)", fg:"var(--info)", ic:I.chart,
+     spark:[.78,.82,.87,.91,.94,.97,1,.99].map(f=>Math.round(A.comp*f)), sc:"#7A4A2B"}
   ];
+
+  const scopeLine = `Friday, ${TODAY} · ${A.batches.length} ${A.batches.length===1?'batch':'batches'} · `
+    + `${A.cadets} cadets · ${A.done.toLocaleString()} of ${A.total.toLocaleString()} topics covered · ${RANGE_LABEL[AF.range]}`;
 
   return `
   <div class="phead">
     <div>
       <h1>Good afternoon, Manthan <span class="wave">👋</span></h1>
-      <div class="sub">Friday, ${TODAY} · 4 active batches · 59 cadets enrolled across 3 programmes</div>
+      <div class="sub">${scopeLine}</div>
     </div>
     <div style="display:flex;gap:10px">
       <button class="btn btn-ghost" onclick="toast('Export queued','Progress report will download as CSV.')">${I.pdf} Export</button>
@@ -850,7 +986,7 @@ function adminView(){
             <i><span class="sw" style="background:#EADFC6"></span>Last week</i>
           </div>
         </div>
-        <div class="card-b tight">${hoursChart(HOURS_THIS,HOURS_PREV,DAYS)}</div>
+        <div class="card-b tight">${hoursChart(HOURS_THIS.map(v=>+(v*A.wk).toFixed(1)),HOURS_PREV.map(v=>+(v*A.wk).toFixed(1)),DAYS)}</div>
       </div>
     </div>
 
@@ -858,47 +994,30 @@ function adminView(){
     <div class="c4">
       <div class="card">
         <div class="card-h">
-          <div><h3>Needs attention</h3><div class="hint">Exceptions, newest first</div></div>
-          <span class="st st-late">${I.alert} 4</span>
+          <div><h3>Needs attention</h3><div class="hint">Exceptions in the current selection</div></div>
+          ${A.alerts.length
+            ? `<span class="st st-late">${I.alert} ${A.alerts.length}</span>`
+            : `<span class="st st-ok">${I.check} Clear</span>`}
         </div>
         <div class="card-b">
-          <div class="alerts">
-            <div class="alert a-late">
-              <span class="aic" style="color:var(--late)">${I.alertLg}</span>
-              <div style="flex:1">
-                <div class="atitle">2 classes not reported</div>
-                <div class="adesc">Ground Services 02 — 29 &amp; 30 Jul. Same-day reporting is the adoption target.</div>
-                <div class="aact">
-                  <button class="mini-btn solid" onclick="toast('Reminder sent','Nudge delivered to Anjali Deshmukh.')">${I.bell} Remind instructor</button>
-                  <button class="mini-btn">View</button>
+          ${A.alerts.length ? `<div class="alerts">
+            ${A.alerts.map(a=>`
+              <div class="alert a-${a.kind}">
+                <span class="aic" style="color:var(--${a.kind==='late'?'late':a.kind==='warn'?'warn':'info'})">${a.kind==='info'?I.report:I.alertLg}</span>
+                <div style="flex:1">
+                  <div class="atitle">${a.title}</div>
+                  <div class="adesc">${a.desc}</div>
+                  <div class="aact">
+                    ${a.remind?`<button class="mini-btn solid" onclick="toast('Reminder sent','Nudge delivered to ${a.remind}.')">${I.bell} Remind instructor</button>`:''}
+                    <button class="mini-btn">View</button>
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div class="alert a-warn">
-              <span class="aic" style="color:var(--warn)">${I.alertLg}</span>
-              <div style="flex:1">
-                <div class="atitle">3 cadets below 75% attendance</div>
-                <div class="adesc">Saanvi Deshpande (63%), Kabir Sethi (68%), Vivaan Rathore (72%).</div>
-                <div class="aact"><button class="mini-btn">Review cadets</button></div>
-              </div>
-            </div>
-            <div class="alert a-warn">
-              <span class="aic" style="color:var(--warn)">${I.clock}</span>
-              <div style="flex:1">
-                <div class="atitle">Ground Services 02 is behind plan</div>
-                <div class="adesc">22% of syllabus covered against 41% scheduled for this point in the term.</div>
-                <div class="aact"><button class="mini-btn">Open batch</button></div>
-              </div>
-            </div>
-            <div class="alert a-info">
-              <span class="aic" style="color:var(--info)">${I.report}</span>
-              <div style="flex:1">
-                <div class="atitle">1 report awaiting correction</div>
-                <div class="adesc">VOR · Nitte 2nd Batch · attendance query raised by instructor. Admin-only edit, fully audited.</div>
-                <div class="aact"><button class="mini-btn">Open report</button></div>
-              </div>
-            </div>
-          </div>
+              </div>`).join('')}
+          </div>`
+          : `<div style="text-align:center;padding:30px 8px">
+               <div style="font-family:'Playfair Display',serif;font-size:var(--t-md);font-weight:700;color:var(--navy)">Nothing needs attention</div>
+               <div style="font-size:var(--t-xs);color:var(--text-2);margin-top:6px">Every class in this selection is reported and on plan.</div>
+             </div>`}
         </div>
       </div>
     </div>
@@ -917,12 +1036,12 @@ function adminView(){
               <th>Batch</th><th>Cadets</th><th style="min-width:180px">Syllabus</th><th style="min-width:150px">Attendance</th><th>Last class</th><th></th>
             </tr></thead>
             <tbody>
-              ${BATCHES.map(b=>`
+              ${A.batches.length?A.batches.map(b=>`
                 <tr>
                   <td><div class="nm">${b.name}</div><div class="sub">${b.prog}</div></td>
                   <td class="num">${b.cadets}</td>
                   <td>
-                    <div class="barline">${bar(b.syll, b.syll>=50?'#0F7A45':b.syll>=35?'#F0A830':'#8E1B2E')}<span class="n">${b.syll}%</span></div>
+                    <div class="barline">${bar(syll(b), syll(b)>=50?'#0F7A45':syll(b)>=35?'#F0A830':'#8E1B2E')}<span class="n">${syll(b)}%</span></div>
                   </td>
                   <td>
                     <div style="display:flex;align-items:center;gap:9px">
@@ -933,7 +1052,7 @@ function adminView(){
                   <td style="text-align:right">
                     <span class="rowact"><button class="mini-btn">${I.eye} Open</button></span>
                   </td>
-                </tr>`).join('')}
+                </tr>`).join('') : emptyRow(6,'No batches match these filters')}
             </tbody>
           </table>
           </div>
@@ -946,16 +1065,16 @@ function adminView(){
       <div class="card">
         <div class="card-h"><div><h3>Recent activity</h3><div class="hint">Audit-visible events</div></div><a class="link" href="#">All</a></div>
         <div class="card-b">
-          <ul class="feed">
-            ${[
-              {ic:I.report,bg:"var(--brand-050)",fg:"var(--brand)",t:"<b>Manthan Bhanushali</b> filed a class report — VOR · Nitte 2nd Batch",tm:"12 minutes ago"},
-              {ic:I.users, bg:"var(--ok-bg)",   fg:"var(--ok)",   t:"<b>Rinkesh Punjwani</b> marked attendance 15 of 16 — Clouds Part II",tm:"1 hour ago"},
-              {ic:I.alertLg,bg:"var(--warn-bg)",fg:"var(--warn)", t:"Attendance corrected for <b>Aarav Mehta</b> — new audited entry, original retained",tm:"3 hours ago"},
-              {ic:I.book,  bg:"var(--info-bg)", fg:"var(--info)", t:"<b>4 documents</b> added to CAE Oxford — visible to all assigned batches",tm:"5 hours ago"},
-              {ic:I.plus,  bg:"var(--navy-050)",fg:"var(--navy)", t:"<b>Priya Malhotra</b> admitted to NITTE 1st Batch 2025-26",tm:"Yesterday, 16:20"}
-            ].map(f=>`<li><span class="fic" style="background:${f.bg};color:${f.fg}">${f.ic}</span>
-              <div><div class="ftxt">${f.t}</div><div class="ftime">${f.tm}</div></div></li>`).join('')}
-          </ul>
+          ${A.feed.length ? `<ul class="feed">
+            ${A.feed.map(f=>{
+              const tone={brand:["var(--brand-050)","var(--brand)"],ok:["var(--ok-bg)","var(--ok)"],
+                          warn:["var(--warn-bg)","var(--warn)"],info:["var(--info-bg)","var(--info)"],
+                          late:["var(--late-bg)","var(--late)"],idle:["var(--navy-050)","var(--navy)"]}[f.tone];
+              return `<li><span class="fic" style="background:${tone[0]};color:${tone[1]}">${I[f.ic]}</span>
+                <div><div class="ftxt">${f.t}</div><div class="ftime">${f.tm}</div></div></li>`;
+            }).join('')}
+          </ul>`
+          : `<div style="text-align:center;padding:26px 8px;font-size:var(--t-xs);color:var(--text-2)">No activity in this selection.</div>`}
         </div>
       </div>
     </div>
@@ -963,21 +1082,23 @@ function adminView(){
     <!-- Completion by subject -->
     <div class="c6">
       <div class="card">
-        <div class="card-h"><div><h3>Completion by subject</h3><div class="hint">Distinct topics covered · CPL Ground School</div></div></div>
+        <div class="card-h"><div><h3>Completion by subject</h3>
+          <div class="hint">Distinct topics covered · ${AF.prog==="all"?"all programmes":AF.prog}</div></div></div>
         <div class="card-b">
-          <div class="subj">
-            ${SUBJECTS.map(s=>{
-              const p=Math.round(s.done/s.total*100);
+          ${A.subjects.length ? `<div class="subj">
+            ${A.subjects.map(s=>{
+              const p=Math.round(s.d/s.t*100);
               return `<div class="subj-row">
                 <div class="subj-top">
-                  <span class="subj-dot" style="background:${s.colour}"></span>
-                  <span class="subj-name">${s.short}</span>
-                  <span class="subj-meta"><b>${s.done}</b> of ${s.total} topics · ${s.chapters}</span>
+                  <span class="subj-dot" style="background:${s.c}"></span>
+                  <span class="subj-name">${s.n}</span>
+                  <span class="subj-meta"><b>${s.d}</b> of ${s.t} topics</span>
                 </div>
-                <div class="barline">${bar(p,s.colour)}<span class="n">${p}%</span></div>
+                <div class="barline">${bar(p,s.c)}<span class="n">${p}%</span></div>
               </div>`;
             }).join('')}
-          </div>
+          </div>`
+          : `<div style="text-align:center;padding:26px 8px;font-size:var(--t-xs);color:var(--text-2)">No curriculum in this selection.</div>`}
         </div>
       </div>
     </div>
@@ -986,10 +1107,10 @@ function adminView(){
     <div class="c6">
       <div class="card">
         <div class="card-h">
-          <div><h3>Attendance trend</h3><div class="hint">Academy-wide average, last 8 weeks</div></div>
+          <div><h3>Attendance trend</h3><div class="hint">${AF.batch==="all"?"Weighted average":byId(AF.batch).name}, last 8 weeks</div></div>
           <span class="st st-ok">${I.up} +2.4 pts</span>
         </div>
-        <div class="card-b tight">${lineChart(ATT_TREND)}</div>
+        <div class="card-b tight">${lineChart(A.trend)}</div>
       </div>
     </div>
 
@@ -1002,16 +1123,16 @@ function adminView(){
           <table class="tbl">
             <thead><tr><th>Instructor</th><th>Batches</th><th>Classes</th><th>Hours</th><th style="min-width:260px">Share of teaching load</th><th></th></tr></thead>
             <tbody>
-              ${INSTRUCTORS.map(t=>{
-                const share=Math.round(parseFloat(t.hours)/96.5*100);
+              ${A.instr.length?A.instr.map(t=>{
+                const share=Math.round(t.hours/A.instrMax*100);
                 return `<tr>
                   <td><div class="who"><span class="av-sm" style="background:${t.c}18;color:${t.c}">${t.i}</span><span class="nm">${t.n}</span></div></td>
-                  <td class="num">${t.batches}</td><td class="num">${t.classes}</td>
-                  <td class="num mono">${t.hours}</td>
+                  <td class="num">${t.batches.size}</td><td class="num">${t.classes}</td>
+                  <td class="num mono">${fmtH(t.hours)}</td>
                   <td><div class="barline">${bar(share,t.c)}<span class="n">${share}%</span></div></td>
                   <td style="text-align:right"><span class="rowact"><button class="mini-btn">${I.eye} Reports</button></span></td>
                 </tr>`;
-              }).join('')}
+              }).join('') : emptyRow(6,'No instructors match these filters')}
             </tbody>
           </table>
           </div>
@@ -1090,7 +1211,7 @@ function instructorView(){
               <div class="c6">
                 <div style="border:1px solid var(--line);border-radius:var(--r);padding:16px;height:100%">
                   <div style="display:flex;gap:16px;align-items:center">
-                    ${ring(b.syll, 92, 9, b.syll>=50?'#0F7A45':'#F0A830', 'Syllabus')}
+                    ${ring(syll(b), 92, 9, syll(b)>=50?'#0F7A45':'#F0A830', 'Syllabus')}
                     <div style="min-width:0">
                       <div class="nm" style="font-size:var(--t-sm);line-height:1.35">${b.name}</div>
                       <div class="sub" style="margin-bottom:10px">${b.prog}</div>
@@ -1454,29 +1575,48 @@ function studentView(){
 /* =====================================================================
    FILTER BAR
    ===================================================================== */
+function emptyRow(cols, msg){
+  return `<tr><td colspan="${cols}" style="padding:34px 14px;text-align:center">
+    <div style="font-family:'Playfair Display',serif;font-size:var(--t-md);font-weight:700;color:var(--navy)">${msg}</div>
+    <div style="font-size:var(--t-xs);color:var(--text-2);margin-top:6px">Try widening the programme, batch or instructor filter.</div>
+    <button class="mini-btn" style="margin-top:12px" onclick="resetAF()">Reset filters</button></td></tr>`;
+}
+
 function filterBar(){
+  const opts = (list, cur, allLabel) =>
+    `<option value="all"${cur==="all"?" selected":""}>${allLabel}</option>` +
+    list.map(o=>`<option value="${o.v}"${cur===o.v?" selected":""}>${o.l}</option>`).join('');
+
+  // batch list respects the programme filter (cascading)
+  const bList = BATCHES.filter(b=>AF.prog==="all"||b.prog===AF.prog).map(b=>({v:b.id,l:b.name}));
+
+  const chips=[];
+  if(AF.range!=="d30") chips.push([RANGE_LABEL[AF.range], "range"]);
+  if(AF.prog!=="all")  chips.push([AF.prog, "prog"]);
+  if(AF.batch!=="all") chips.push([byId(AF.batch).name, "batch"]);
+  if(AF.instr!=="all") chips.push([INSTRUCTORS.find(t=>t.i===AF.instr).n, "instr"]);
+
   return `
   <div class="filters">
     <span class="fl-label">${I.filter} Filters</span>
     <div class="seg" role="group" aria-label="Date range">
-      <button onclick="segPick(this)">This month</button>
-      <button class="on" onclick="segPick(this)">30 days</button>
-      <button onclick="segPick(this)">3 months</button>
-      <button onclick="segPick(this)">Custom</button>
+      ${Object.entries(RANGES).map(([k,l])=>
+        `<button class="${AF.range===k?'on':''}" onclick="setAF('range','${k}')">${l}</button>`).join('')}
     </div>
-    <select class="sel" aria-label="Programme">
-      <option>All programmes</option><option>CPL Ground School</option><option>Cabin Crew</option><option>Airport Ground Services</option>
+    <select class="sel" aria-label="Programme" onchange="setAF('prog',this.value)">
+      ${opts(PROGRAMMES.map(p=>({v:p,l:p})), AF.prog, "All programmes")}
     </select>
-    <select class="sel" aria-label="Batch">
-      <option>All batches</option>${BATCHES.map(b=>`<option>${b.name}</option>`).join('')}
+    <select class="sel" aria-label="Batch" onchange="setAF('batch',this.value)">
+      ${opts(bList, AF.batch, "All batches")}
     </select>
-    <select class="sel" aria-label="Instructor">
-      <option>All instructors</option>${INSTRUCTORS.map(t=>`<option>${t.n}</option>`).join('')}
+    <select class="sel" aria-label="Instructor" onchange="setAF('instr',this.value)">
+      ${opts(INSTRUCTORS.map(t=>({v:t.i,l:t.n})), AF.instr, "All instructors")}
     </select>
-    <span class="chip-applied">Last 30 days
-      <button aria-label="Remove filter"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </span>
-    <button class="reset" onclick="toast('Filters reset','Showing the last 30 days, all batches.')">Reset</button>
+    ${chips.map(([t,k])=>`<span class="chip-applied">${t}
+      <button aria-label="Remove ${t} filter" onclick="setAF('${k}','${k==='range'?'d30':'all'}')">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button></span>`).join('')}
+    ${chips.length?`<button class="reset" onclick="resetAF()">Reset all</button>`:''}
   </div>`;
 }
 
