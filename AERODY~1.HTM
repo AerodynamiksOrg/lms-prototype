@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Aerodynamiks Academy — Dashboard Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   AERODYNAMIKS ACADEMY — DESIGN TOKENS
+   Brand palette D-20, sourced from aerodynamiks.aero
+   ============================================================ */
+:root{
+  /* Brand */
+  --brand:#E31E24;          /* primary action ONLY - never a status colour */
+  --brand-700:#B8171C;
+  --brand-050:#FDF1F1;
+  --gold:#F0A830;
+  --gold-050:#FFF8EA;
+  --gold-200:#F7DFAE;
+  --cream:#FCE8A8;
+  --ink:#241D12;
+
+  /* Warm dark - replaces the old navy. No blue anywhere in the palette. */
+  --navy:#2E2617;
+  --navy-700:#453A24;
+  --navy-050:#FBF5E8;       /* warm tint used for hovers, segments, chips */
+
+  /* Ochre wash used for the sidebar and highlighted surfaces */
+  --wash-1:rgba(240,168,48,.22);
+  --wash-2:rgba(240,168,48,.10);
+  --wash-hover:rgba(240,168,48,.16);
+  --wash-active:rgba(240,168,48,.32);
+  --wash-line:rgba(184,148,66,.28);
+
+  /* Status scale - separate from brand red, and free of blue */
+  --ok:#0F7A45;      --ok-bg:#E9F6EF;
+  --warn:#B26A00;    --warn-bg:#FDF3E3;
+  --late:#8E1B2E;    --late-bg:#FBECEE;   /* deeper crimson, distinct from brand */
+  --idle:#6B6153;    --idle-bg:#F3EFE6;
+  --info:#7A4A2B;    --info-bg:#FAEFE6;   /* terracotta, was blue */
+
+  /* Surfaces */
+  --bg:#FAF7F0;
+  --card:#FFFFFF;
+  --line:#EAE3D4;
+  --line-soft:#F3EDE1;
+  --text:#2A2318;
+  --text-2:#6B6153;
+  --text-3:#9A917E;
+
+  /* Type scale 12/14/16/20/24/30/36 */
+  --t-xs:12px; --t-sm:14px; --t-md:16px; --t-lg:20px; --t-xl:24px; --t-2xl:30px; --t-3xl:36px;
+
+  /* Space (8pt) */
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px;
+
+  --r-sm:8px; --r:12px; --r-lg:16px; --r-full:999px;
+  --shadow-1:0 1px 2px rgba(16,27,61,.05), 0 1px 3px rgba(16,27,61,.04);
+  --shadow-2:0 4px 12px rgba(16,27,61,.07), 0 2px 4px rgba(16,27,61,.04);
+  --shadow-3:0 12px 32px rgba(16,27,61,.12);
+  --sidebar-w:268px;
+  --sidebar-w-collapsed:78px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'Inter',system-ui,-apple-system,'Segoe UI',sans-serif;
+  background:var(--bg); color:var(--text);
+  font-size:var(--t-sm); line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.serif{font-family:'Playfair Display',Georgia,'Times New Roman',serif;color:var(--navy);letter-spacing:-.01em}
+button{font-family:inherit;font-size:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px;border-radius:4px}
+::-webkit-scrollbar{width:9px;height:9px}
+::-webkit-scrollbar-thumb{background:#DCD2BE;border-radius:99px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#C9BDA2}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ============================== SHELL ============================== */
+.app{display:flex;min-height:100vh}
+
+/* ---------- Sidebar ---------- */
+.sidebar{
+  width:var(--sidebar-w);flex:0 0 var(--sidebar-w);
+  background:linear-gradient(180deg,var(--wash-1),var(--wash-2)),#FFFCF4;
+  color:var(--navy);border-right:1px solid var(--wash-line);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
+  transition:width .22s ease, flex-basis .22s ease;
+  z-index:40;
+}
+.app.collapsed .sidebar{width:var(--sidebar-w-collapsed);flex-basis:var(--sidebar-w-collapsed)}
+.sb-head{padding:18px 16px 14px;display:flex;align-items:center;gap:11px;min-height:82px}
+.sb-logo{display:flex;align-items:center;gap:11px;overflow:hidden}
+.sb-mark{flex:0 0 auto}
+.sb-word{display:flex;flex-direction:column;line-height:1.05;white-space:nowrap}
+.sb-word .n1{font-family:'Inter',sans-serif;font-weight:800;font-size:15px;letter-spacing:.09em;color:var(--brand)}
+.sb-word .n2{font-size:9.5px;letter-spacing:.26em;color:#B5820F;font-weight:700;text-transform:uppercase;margin-top:3px}
+.app.collapsed .sb-word{display:none}
+.app.collapsed .sb-head{justify-content:center;padding-left:0;padding-right:0}
+
+.sb-toggle{
+  margin-left:auto;width:28px;height:28px;border-radius:8px;
+  display:grid;place-items:center;color:#8A7642;
+  background:rgba(240,168,48,.20);transition:.15s;
+}
+.sb-toggle:hover{background:rgba(240,168,48,.34);color:var(--navy)}
+.app.collapsed .sb-toggle{display:none}
+
+.sb-nav{flex:1;overflow-y:auto;overflow-x:hidden;padding:6px 12px 12px}
+.sb-nav::-webkit-scrollbar-thumb{background:rgba(184,148,66,.32);border-color:transparent}
+.sb-group{margin-top:18px}
+.sb-group:first-child{margin-top:4px}
+.sb-label{
+  font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+  color:#A08F63;font-weight:700;padding:0 12px 8px;white-space:nowrap;
+}
+.app.collapsed .sb-label{opacity:0;height:8px;padding:0;overflow:hidden}
+.sb-item{
+  display:flex;align-items:center;gap:12px;
+  padding:10px 12px;border-radius:10px;color:#6A5D40;
+  font-size:var(--t-sm);font-weight:500;white-space:nowrap;
+  position:relative;transition:.15s;width:100%;text-align:left;margin-bottom:2px;
+}
+.sb-item svg{flex:0 0 18px;opacity:.9}
+.sb-item:hover{background:var(--wash-hover);color:var(--navy)}
+.sb-item.active{background:var(--wash-active);color:var(--navy);font-weight:700}
+.sb-item.active svg{opacity:1;color:var(--brand)}
+.sb-item.active::before{
+  content:"";position:absolute;left:-12px;top:50%;transform:translateY(-50%);
+  width:3px;height:22px;background:var(--brand);border-radius:0 3px 3px 0;
+}
+.sb-item .txt{overflow:hidden}
+.app.collapsed .sb-item .txt,.app.collapsed .sb-item .pill{display:none}
+.app.collapsed .sb-item{justify-content:center;padding:11px 0}
+.sb-item .pill{
+  margin-left:auto;background:var(--brand);color:#fff;font-size:10px;font-weight:700;
+  padding:2px 7px;border-radius:99px;line-height:1.5;
+}
+
+.sb-foot{border-top:1px solid var(--wash-line);padding:12px}
+.sb-user{display:flex;align-items:center;gap:10px;padding:8px;border-radius:10px;width:100%;text-align:left}
+.sb-user:hover{background:var(--wash-hover)}
+.sb-user .av{
+  width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),#B8171C);
+  color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center;flex:0 0 34px;
+}
+.sb-user .meta{overflow:hidden;white-space:nowrap}
+.sb-user .meta b{display:block;font-size:13px;font-weight:700;color:var(--navy);text-overflow:ellipsis;overflow:hidden}
+.sb-user .meta span{font-size:11px;color:#8A7C5C}
+.app.collapsed .sb-user .meta,.app.collapsed .sb-user .chev{display:none}
+.app.collapsed .sb-user{justify-content:center}
+
+/* ---------- Main ---------- */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+
+.topbar{
+  position:sticky;top:0;z-index:30;background:rgba(250,247,240,.88);
+  backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+  padding:14px 28px;display:flex;align-items:center;gap:16px;
+}
+.expand-btn{display:none;width:34px;height:34px;border-radius:9px;background:var(--card);border:1px solid var(--line);place-items:center;color:var(--text-2)}
+.app.collapsed .expand-btn{display:grid}
+.crumb{font-size:var(--t-xs);color:var(--text-3);font-weight:500;letter-spacing:.02em}
+.crumb b{color:var(--text-2);font-weight:600}
+.page-t{font-size:var(--t-lg);margin-top:1px}
+
+.search{
+  margin-left:auto;position:relative;width:270px;
+}
+.search input{
+  width:100%;height:38px;border-radius:10px;border:1px solid var(--line);
+  background:var(--card);padding:0 12px 0 36px;font-size:var(--t-sm);color:var(--text);
+  transition:.15s;
+}
+.search input::placeholder{color:var(--text-3)}
+.search input:focus{outline:none;border-color:var(--navy);box-shadow:0 0 0 3px rgba(16,27,61,.08)}
+.search svg{position:absolute;left:11px;top:10px;color:var(--text-3)}
+
+.icon-btn{
+  width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--card);
+  display:grid;place-items:center;color:var(--text-2);position:relative;transition:.15s;
+}
+.icon-btn:hover{border-color:#D5C9AE;color:var(--navy)}
+.dot{position:absolute;top:8px;right:9px;width:7px;height:7px;border-radius:99px;background:var(--brand);border:2px solid var(--card)}
+
+.demo-pill{
+  font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--warn);background:var(--warn-bg);border:1px solid #F0DFBE;
+  padding:4px 9px;border-radius:99px;white-space:nowrap;
+}
+
+/* Role switcher */
+.roleswitch{display:flex;background:var(--navy-050);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px}
+.roleswitch button{
+  padding:7px 14px;border-radius:8px;font-size:var(--t-xs);font-weight:600;color:var(--text-2);
+  display:flex;align-items:center;gap:6px;transition:.15s;white-space:nowrap;
+}
+.roleswitch button:hover{color:var(--navy)}
+.roleswitch button.on{background:var(--card);color:var(--navy);box-shadow:var(--shadow-1)}
+.roleswitch button.on svg{color:var(--brand)}
+
+.content{padding:24px 28px 56px;max-width:1560px;width:100%}
+
+/* ---------- Page header ---------- */
+.phead{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.phead h1{font-size:var(--t-2xl);line-height:1.2}
+.phead .sub{color:var(--text-2);font-size:var(--t-sm);margin-top:5px}
+.wave{display:inline-block;transform-origin:70% 70%;animation:wave 2.4s ease-in-out 1s 2}
+@keyframes wave{0%,60%,100%{transform:rotate(0)}10%,30%{transform:rotate(14deg)}20%,40%{transform:rotate(-8deg)}}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-radius:10px;
+  font-size:var(--t-sm);font-weight:600;transition:.15s;white-space:nowrap;
+}
+.btn-primary{background:var(--brand);color:#fff;box-shadow:0 1px 2px rgba(227,30,36,.3)}
+.btn-primary:hover{background:var(--brand-700);box-shadow:0 4px 12px rgba(227,30,36,.28);transform:translateY(-1px)}
+.btn-ghost{background:var(--card);border:1px solid var(--line);color:var(--navy)}
+.btn-ghost:hover{border-color:#D5C9AE;box-shadow:var(--shadow-1)}
+.btn-sm{height:32px;padding:0 11px;font-size:var(--t-xs);border-radius:8px}
+
+/* ---------- Filter bar ---------- */
+.filters{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:10px 12px;margin-bottom:20px;box-shadow:var(--shadow-1);
+}
+.fl-label{font-size:var(--t-xs);color:var(--text-3);font-weight:600;display:flex;align-items:center;gap:6px;padding-right:2px}
+.seg{display:flex;background:var(--navy-050);border-radius:9px;padding:3px;gap:2px}
+.seg button{padding:6px 11px;border-radius:7px;font-size:var(--t-xs);font-weight:600;color:var(--text-2)}
+.seg button.on{background:var(--card);color:var(--navy);box-shadow:var(--shadow-1)}
+.sel{
+  height:34px;border:1px solid var(--line);border-radius:9px;background:var(--card);
+  padding:0 30px 0 11px;font-size:var(--t-xs);font-weight:600;color:var(--navy);
+  appearance:none;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%235B6478' stroke-width='2.5' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat:no-repeat;background-position:right 9px center;cursor:pointer;
+}
+.sel:hover{border-color:#D5C9AE}
+.chip-applied{
+  display:inline-flex;align-items:center;gap:7px;height:30px;padding:0 6px 0 11px;border-radius:99px;
+  background:var(--navy-050);border:1px solid #EADFC6;color:var(--navy);font-size:var(--t-xs);font-weight:600;
+}
+.chip-applied button{width:18px;height:18px;border-radius:99px;display:grid;place-items:center;color:var(--text-2)}
+.chip-applied button:hover{background:#EADFC6;color:var(--navy)}
+.reset{margin-left:auto;font-size:var(--t-xs);font-weight:600;color:var(--brand);padding:6px 8px;border-radius:7px}
+.reset:hover{background:var(--brand-050)}
+
+/* ---------- Grid & cards ---------- */
+.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px}
+.c3{grid-column:span 3}.c4{grid-column:span 4}.c5{grid-column:span 5}
+.c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}
+.c9{grid-column:span 9}.c12{grid-column:span 12}
+
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);
+  box-shadow:var(--shadow-1);overflow:hidden;display:flex;flex-direction:column;
+}
+.card-h{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--line-soft)}
+.card-h h3{font-size:var(--t-md);font-weight:700}
+.card-h .hint{font-size:var(--t-xs);color:var(--text-3);margin-top:2px;font-family:'Inter',sans-serif}
+.card-b{padding:18px;flex:1}
+.card-b.tight{padding:12px 18px 18px}
+.link{font-size:var(--t-xs);font-weight:600;color:var(--brand)}
+.link:hover{text-decoration:underline}
+
+/* ---------- KPI ---------- */
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r-lg);padding:18px;box-shadow:var(--shadow-1);position:relative;overflow:hidden;transition:.18s}
+.kpi:hover{box-shadow:var(--shadow-2);transform:translateY(-2px)}
+.kpi .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.kpi .ic{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;flex:0 0 36px}
+.kpi .lab{font-size:var(--t-xs);color:var(--text-2);font-weight:600;letter-spacing:.01em}
+.kpi .val{font-family:'Playfair Display',Georgia,serif;font-size:var(--t-2xl);font-weight:700;color:var(--navy);line-height:1.1;margin-top:10px;letter-spacing:-.02em}
+.kpi .val small{font-size:15px;font-weight:600;color:var(--text-2);font-family:'Inter',sans-serif;margin-left:2px}
+.kpi .foot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:10px}
+.delta{display:inline-flex;align-items:center;gap:4px;font-size:var(--t-xs);font-weight:700;padding:3px 7px;border-radius:99px}
+.delta.up{color:var(--ok);background:var(--ok-bg)}
+.delta.down{color:var(--late);background:var(--late-bg)}
+.delta.flat{color:var(--idle);background:var(--idle-bg)}
+.kpi .vs{font-size:11px;color:var(--text-3)}
+
+/* ---------- Status chips (icon + text, never colour alone) ---------- */
+.st{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px 3px 7px;border-radius:99px;white-space:nowrap;letter-spacing:.01em}
+.st svg{flex:0 0 12px}
+.st-ok{color:var(--ok);background:var(--ok-bg)}
+.st-warn{color:var(--warn);background:var(--warn-bg)}
+.st-late{color:var(--late);background:var(--late-bg)}
+.st-idle{color:var(--idle);background:var(--idle-bg)}
+.st-info{color:var(--info);background:var(--info-bg)}
+
+/* ---------- Progress ---------- */
+.bar{height:9px;border-radius:99px;background:#F0EADC;overflow:hidden;position:relative}
+.bar i{display:block;height:100%;border-radius:99px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+.bar.thick{height:11px}
+.bar .thresh{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--navy);opacity:.55;border-radius:2px}
+.barline{display:flex;align-items:center;gap:10px}
+.barline .n{font-size:var(--t-xs);font-weight:700;color:var(--navy);font-variant-numeric:tabular-nums;min-width:38px;text-align:right}
+
+/* ---------- Tables ---------- */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{
+  text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);
+  font-weight:700;padding:0 14px 10px;border-bottom:1px solid var(--line-soft);white-space:nowrap;
+}
+.tbl td{padding:13px 14px;border-bottom:1px solid var(--line-soft);vertical-align:middle}
+.tbl tbody tr{transition:.12s}
+.tbl tbody tr:hover{background:var(--navy-050)}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl .num{font-variant-numeric:tabular-nums;font-weight:600;color:var(--navy)}
+.tbl .nm{font-weight:600;color:var(--navy);font-size:var(--t-sm)}
+.tbl .sub{font-size:var(--t-xs);color:var(--text-3);margin-top:2px}
+.rowact{opacity:0;transition:.15s}
+.tbl tbody tr:hover .rowact,.tbl tbody tr:focus-within .rowact{opacity:1}
+.tbl-wrap{overflow-x:auto}
+
+.av-sm{
+  width:32px;height:32px;border-radius:9px;display:grid;place-items:center;
+  font-size:11px;font-weight:700;flex:0 0 32px;letter-spacing:.02em;
+}
+.who{display:flex;align-items:center;gap:10px}
+
+/* ---------- Lists / feed ---------- */
+.feed{display:flex;flex-direction:column}
+.feed li{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line-soft);list-style:none}
+.feed li:last-child{border-bottom:none;padding-bottom:0}
+.feed li:first-child{padding-top:0}
+.feed .fic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:0 0 30px;margin-top:1px}
+.feed .ftxt{font-size:var(--t-sm);color:var(--text);line-height:1.45}
+.feed .ftxt b{font-weight:600;color:var(--navy)}
+.feed .ftime{font-size:11px;color:var(--text-3);margin-top:3px;font-variant-numeric:tabular-nums}
+
+.alerts{display:flex;flex-direction:column;gap:10px}
+.alert{
+  display:flex;gap:12px;padding:13px;border-radius:var(--r);border:1px solid;align-items:flex-start;
+  transition:.15s;
+}
+.alert:hover{transform:translateX(2px)}
+.alert.a-late{background:var(--late-bg);border-color:#EFD3D8}
+.alert.a-warn{background:var(--warn-bg);border-color:#F0DFBE}
+.alert.a-info{background:var(--info-bg);border-color:#EDDCCC}
+.alert .aic{flex:0 0 20px;margin-top:1px}
+.alert .atitle{font-size:var(--t-sm);font-weight:700;color:var(--navy)}
+.alert .adesc{font-size:var(--t-xs);color:var(--text-2);margin-top:3px;line-height:1.5}
+.alert .aact{margin-top:8px;display:flex;gap:8px}
+.mini-btn{font-size:11px;font-weight:700;padding:5px 10px;border-radius:7px;background:var(--card);border:1px solid var(--line);color:var(--navy);transition:.15s}
+.mini-btn:hover{border-color:#D5C9AE;box-shadow:var(--shadow-1)}
+.mini-btn.solid{background:var(--brand);color:#fff;border-color:var(--brand)}
+.mini-btn.solid:hover{background:var(--brand-700)}
+
+/* ---------- Hero (instructor / student) ---------- */
+.hero{
+  background:linear-gradient(118deg,#FFF8E9 0%,#FDEFD2 54%,#FAE5B6 100%);
+  border:1px solid #F1DFB4;
+  border-radius:var(--r-lg);padding:24px;color:var(--navy);position:relative;overflow:hidden;
+  box-shadow:var(--shadow-2);
+}
+.hero::after{
+  content:"";position:absolute;right:-70px;top:-90px;width:330px;height:330px;border-radius:50%;
+  background:radial-gradient(circle,rgba(227,30,36,.10),transparent 68%);
+}
+.hero::before{
+  content:"";position:absolute;right:8%;bottom:-40%;width:420px;height:420px;border-radius:50%;
+  border:1px solid rgba(184,148,66,.20);
+}
+.hero .in{position:relative;z-index:1}
+.hero h2{color:var(--navy);font-size:var(--t-xl)}
+.hero .lede{color:#7A6A45;font-size:var(--t-sm);margin-top:6px;max-width:60ch}
+.hero-row{display:flex;gap:24px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+.hero-stats{display:flex;gap:12px;flex-wrap:wrap}
+.hstat{background:rgba(255,255,255,.66);border:1px solid rgba(184,148,66,.30);border-radius:var(--r);padding:11px 15px;min-width:112px;backdrop-filter:blur(4px)}
+.hstat .l{font-size:11px;color:#93803F;font-weight:700;letter-spacing:.03em;text-transform:uppercase}
+.hstat .v{font-family:'Playfair Display',serif;font-size:var(--t-xl);font-weight:700;margin-top:3px;line-height:1.1;color:var(--navy)}
+.hstat .v small{font-size:13px;font-family:'Inter',sans-serif;font-weight:600;color:#7A6A45}
+
+.class-strip{display:flex;flex-direction:column;gap:10px;margin-top:18px;position:relative;z-index:1}
+.class-row{
+  display:flex;align-items:center;gap:14px;background:rgba(255,255,255,.62);
+  border:1px solid rgba(184,148,66,.28);border-radius:var(--r);padding:12px 14px;transition:.15s;
+}
+.class-row:hover{background:rgba(255,255,255,.9);border-color:rgba(184,148,66,.45)}
+.class-row .time{
+  font-variant-numeric:tabular-nums;font-weight:700;font-size:var(--t-sm);color:#8A5A00;
+  background:rgba(240,168,48,.24);border:1px solid rgba(184,148,66,.38);
+  padding:6px 10px;border-radius:8px;flex:0 0 auto;
+}
+.class-row .cinfo b{display:block;font-size:var(--t-sm);font-weight:700;color:var(--navy)}
+.class-row .cinfo span{font-size:var(--t-xs);color:#7A6A48}
+.class-row .cact{margin-left:auto;display:flex;gap:8px;align-items:center}
+.btn-gold{background:var(--brand);color:#fff;font-weight:700}
+.btn-gold:hover{background:var(--brand-700)}
+.btn-onhero{background:rgba(255,255,255,.8);border:1px solid rgba(184,148,66,.38);color:var(--navy)}
+.btn-onhero:hover{background:#fff}
+
+/* ---------- Ring ---------- */
+.ring-wrap{position:relative;display:grid;place-items:center;flex:0 0 auto}
+.ring-txt{position:absolute;text-align:center;line-height:1.1}
+.ring-txt b{font-family:'Playfair Display',serif;font-size:var(--t-xl);color:var(--navy);display:block}
+.ring-txt span{font-size:10px;color:var(--text-3);font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+
+/* ---------- Subject rows ---------- */
+.subj{display:flex;flex-direction:column;gap:16px}
+.subj-row{display:flex;flex-direction:column;gap:8px}
+.subj-top{display:flex;align-items:center;gap:10px}
+.subj-dot{width:9px;height:9px;border-radius:3px;flex:0 0 9px}
+.subj-name{font-size:var(--t-sm);font-weight:600;color:var(--navy);letter-spacing:.01em}
+.subj-meta{margin-left:auto;font-size:var(--t-xs);color:var(--text-3);font-variant-numeric:tabular-nums}
+.subj-meta b{color:var(--navy);font-weight:700}
+
+/* ---------- Topic / library items ---------- */
+.tlist{display:flex;flex-direction:column}
+.titem{display:flex;gap:12px;padding:13px 0;border-bottom:1px solid var(--line-soft);align-items:flex-start}
+.titem:last-child{border-bottom:none;padding-bottom:0}
+.titem:first-child{padding-top:0}
+.titem .tmain b{font-size:var(--t-sm);font-weight:600;color:var(--navy);display:block;line-height:1.35}
+.titem .tmeta{font-size:var(--t-xs);color:var(--text-3);margin-top:4px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.by{display:inline-flex;align-items:center;gap:5px;font-weight:600;color:var(--text-2)}
+.by .av-xs{width:19px;height:19px;border-radius:6px;display:grid;place-items:center;font-size:9px;font-weight:700}
+.sep{width:3px;height:3px;border-radius:99px;background:#CFC3A8;display:inline-block}
+
+/* ---------- Legend ---------- */
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:var(--t-xs);color:var(--text-2);font-weight:500}
+.legend i{display:inline-flex;align-items:center;gap:6px}
+.legend .sw{width:10px;height:10px;border-radius:3px}
+.legend .swl{width:14px;height:0;border-top:2px dashed #B8AA8A}
+
+/* ---------- Toast ---------- */
+.toast-wrap{position:fixed;top:18px;right:22px;z-index:200;display:flex;flex-direction:column;gap:10px}
+.toast{
+  display:flex;align-items:center;gap:11px;background:var(--card);border:1px solid var(--line);
+  border-left:3px solid var(--ok);border-radius:var(--r);padding:13px 16px;box-shadow:var(--shadow-3);
+  font-size:var(--t-sm);font-weight:600;color:var(--navy);min-width:270px;
+  animation:slidein .28s cubic-bezier(.2,.8,.3,1);
+}
+@keyframes slidein{from{opacity:0;transform:translateX(24px)}to{opacity:1;transform:none}}
+.toast.out{animation:slideout .22s forwards}
+@keyframes slideout{to{opacity:0;transform:translateX(24px)}}
+.toast .tsub{display:block;font-weight:400;font-size:var(--t-xs);color:var(--text-2);margin-top:2px}
+
+/* ---------- Misc ---------- */
+.divider{height:1px;background:var(--line-soft);margin:16px 0}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px dashed var(--line-soft);font-size:var(--t-sm)}
+.kv:last-child{border-bottom:none}
+.kv span{color:var(--text-2)}
+.kv b{color:var(--navy);font-weight:600;text-align:right}
+.hidden{display:none !important}
+.mono{font-variant-numeric:tabular-nums}
+.stack{display:flex;flex-direction:column;gap:16px}
+
+@media (max-width:1360px){
+  .c3{grid-column:span 6}.c4{grid-column:span 6}.c8{grid-column:span 12}
+  .c9{grid-column:span 12}.c5{grid-column:span 12}.c7{grid-column:span 12}
+}
+@media (max-width:900px){
+  .sidebar{position:fixed;left:0;transform:translateX(-100%);transition:transform .22s}
+  .app.mobileopen .sidebar{transform:none}
+  .c3,.c4,.c6{grid-column:span 12}
+  .content{padding:18px 16px 48px}
+  .topbar{padding:12px 16px}
+  .search{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="sb-head">
+      <div class="sb-logo">
+        <svg class="sb-mark" width="48" height="40" viewBox="0 0 120 100" fill="none" aria-label="Aerodynamiks Academy">
+          <!-- swept wings -->
+          <path d="M60 16 C48 20 30 28 5 41 C26 39 40 41 50 45 L56 32 Z" fill="#E09A12"/>
+          <path d="M60 16 C72 20 90 28 115 41 C94 39 80 41 70 45 L64 32 Z" fill="#E09A12"/>
+          <path d="M60 25 C50 29 36 36 17 46 C33 44 44 46 52 49 L57 39 Z" fill="#F5BE55"/>
+          <path d="M60 25 C70 29 84 36 103 46 C87 44 76 46 68 49 L63 39 Z" fill="#F5BE55"/>
+          <!-- A -->
+          <path d="M60 29 L79 73 H68.5 L60 50 L51.5 73 H41 Z" fill="#D98F0A"/>
+          <rect x="49.5" y="60" width="21" height="6" rx="1.5" fill="#D98F0A"/>
+          <!-- brand rules -->
+          <rect x="12" y="80" width="96" height="5" rx="2.5" fill="#E31E24"/>
+          <rect x="22" y="89" width="76" height="3.4" rx="1.7" fill="#E09A12"/>
+        </svg>
+        <div class="sb-word">
+          <span class="n1">AERODYNAMIKS</span>
+          <span class="n2">Academy</span>
+        </div>
+      </div>
+      <button class="sb-toggle" onclick="toggleSidebar()" title="Collapse sidebar" aria-label="Collapse sidebar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+    </div>
+
+    <nav class="sb-nav" id="sbnav"></nav>
+
+    <div class="sb-foot">
+      <button class="sb-user">
+        <span class="av" id="userAv">MB</span>
+        <span class="meta">
+          <b id="userName">Manthan Bhanushali</b>
+          <span id="userRole">Administrator</span>
+        </span>
+        <svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A08F63" stroke-width="2.4" stroke-linecap="round" style="margin-left:auto"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <div class="main">
+    <header class="topbar">
+      <button class="expand-btn" onclick="toggleSidebar()" aria-label="Expand sidebar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div>
+        <div class="crumb">Aerodynamiks Academy <b>· CPL Ground School</b></div>
+        <div class="page-t serif" id="pageTitle">Dashboard</div>
+      </div>
+
+      <div class="search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21" stroke-linecap="round"/></svg>
+        <input type="text" placeholder="Search cadets, chapters, reports…" aria-label="Search">
+      </div>
+
+      <span class="demo-pill" title="This is an interim prototype populated with sample data.">Prototype · sample data</span>
+
+      <div class="roleswitch" role="group" aria-label="Switch role view">
+        <button id="rb-admin" class="on" onclick="setRole('admin')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 4 6v6c0 5 3.4 8.9 8 10 4.6-1.1 8-5 8-10V6Z"/></svg>
+          Admin
+        </button>
+        <button id="rb-instructor" onclick="setRole('instructor')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c3 2 9 2 12 0v-5"/></svg>
+          Instructor
+        </button>
+        <button id="rb-student" onclick="setRole('student')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+          Student
+        </button>
+      </div>
+
+      <button class="icon-btn" aria-label="Notifications"><span class="dot"></span>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      </button>
+    </header>
+
+    <main class="content" id="view"></main>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+/* =====================================================================
+   SAMPLE DATA — modelled on the real Aerodynamiks curriculum & batches
+   ===================================================================== */
+const TODAY = "31 Jul 2026";
+
+const SUBJECTS = [
+  { name:"AIR NAVIGATION",      short:"Air Navigation",      colour:"#E31E24", done:212, total:441, chapters:"58 chapters" },
+  { name:"AVIATION METEOROLOGY",short:"Aviation Meteorology",colour:"#F0A830", done:104, total:168, chapters:"31 chapters" },
+  { name:"TECHNICAL GENERAL",   short:"Technical General",   colour:"#7A4A2B", done:  61, total:151, chapters:"42 chapters" },
+  { name:"REGULATIONS",         short:"Regulations",         colour:"#0F7A45", done:  25, total: 75, chapters:"25 chapters" }
+];
+
+const INSTRUCTORS = [
+  { n:"Manthan Bhanushali", i:"MB", c:"#E31E24", hours:"41:30", classes:29, batches:2 },
+  { n:"Rinkesh Punjwani",   i:"RP", c:"#7A4A2B", hours:"36:15", classes:25, batches:2 },
+  { n:"Anjali Deshmukh",    i:"AD", c:"#0F7A45", hours:"18:45", classes:13, batches:1 }
+];
+
+const BATCHES = [
+  { name:"NITTE 1st Batch 2025-26", prog:"CPL Ground School",      cadets:18, syll:64, att:91, last:"31 Jul 2026", state:"ok"   },
+  { name:"Nitte 2nd Batch 26-27",   prog:"CPL Ground School",      cadets:16, syll:38, att:86, last:"31 Jul 2026", state:"ok"   },
+  { name:"Cabin Crew Batch 03",     prog:"Cabin Crew",             cadets:14, syll:52, att:79, last:"29 Jul 2026", state:"warn" },
+  { name:"Ground Services 02",      prog:"Airport Ground Services",cadets:11, syll:22, att:74, last:"24 Jul 2026", state:"late" }
+];
+
+const CADETS = [
+  { n:"Aarav Mehta",       i:"AM", c:"#E31E24", b:"NITTE 1st Batch 2025-26", att:96, prog:71, due:"04 Aug", dueState:"ok",   flag:null },
+  { n:"Ishaan Kulkarni",   i:"IK", c:"#7A4A2B", b:"NITTE 1st Batch 2025-26", att:93, prog:68, due:"04 Aug", dueState:"ok",   flag:null },
+  { n:"Rhea Nair",         i:"RN", c:"#0F7A45", b:"NITTE 1st Batch 2025-26", att:98, prog:74, due:"04 Aug", dueState:"ok",   flag:null },
+  { n:"Kabir Sethi",       i:"KS", c:"#B26A00", b:"NITTE 1st Batch 2025-26", att:68, prog:44, due:"01 Aug", dueState:"warn", flag:"low-att" },
+  { n:"Ananya Iyer",       i:"AI", c:"#8E1B2E", b:"NITTE 1st Batch 2025-26", att:89, prog:66, due:"04 Aug", dueState:"ok",   flag:null },
+  { n:"Vivaan Rathore",    i:"VR", c:"#7A4A2B", b:"Nitte 2nd Batch 26-27",   att:72, prog:35, due:"29 Jul", dueState:"late", flag:"overdue" },
+  { n:"Diya Chatterjee",   i:"DC", c:"#0F7A45", b:"Nitte 2nd Batch 26-27",   att:91, prog:41, due:"05 Aug", dueState:"ok",   flag:null },
+  { n:"Arjun Menon",       i:"AM", c:"#E31E24", b:"Nitte 2nd Batch 26-27",   att:84, prog:39, due:"05 Aug", dueState:"ok",   flag:null },
+  { n:"Saanvi Deshpande",  i:"SD", c:"#B26A00", b:"Nitte 2nd Batch 26-27",   att:63, prog:28, due:"29 Jul", dueState:"late", flag:"low-att" },
+  { n:"Rohan Bhatia",      i:"RB", c:"#7A4A2B", b:"Nitte 2nd Batch 26-27",   att:88, prog:43, due:"05 Aug", dueState:"ok",   flag:null },
+  { n:"Meera Pillai",      i:"MP", c:"#0F7A45", b:"NITTE 1st Batch 2025-26", att:95, prog:70, due:"04 Aug", dueState:"ok",   flag:null },
+  { n:"Aditya Joshi",      i:"AJ", c:"#8E1B2E", b:"Nitte 2nd Batch 26-27",   att:79, prog:37, due:"05 Aug", dueState:"warn", flag:null }
+];
+
+const HOURS_THIS = [3.5, 4.2, 2.0, 5.0, 4.4, 2.5, 0];      // Mon..Sun current week
+const HOURS_PREV = [2.8, 3.6, 3.2, 3.0, 4.8, 1.5, 0];
+const ATT_TREND  = [88, 86, 90, 92, 89, 93, 91, 94];        // last 8 weeks
+const DAYS = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+
+const RECENT_TOPICS = [
+  { t:"VOR — principle, radial, phase difference",  ch:"RADIO NAVIGATION",  s:"AIR NAVIGATION",       by:"Manthan Bhanushali", i:"MB", c:"#E31E24", d:"27 Jul 2026", n:"9 of 10 topics" },
+  { t:"Clouds — Part II: classification & hazards", ch:"CLOUDS – PART II",  s:"AVIATION METEOROLOGY", by:"Rinkesh Punjwani",   i:"RP", c:"#7A4A2B", d:"27 Jul 2026", n:"6 of 6 topics"  },
+  { t:"Density — ISA deviation, density altitude",  ch:"DENSITY",           s:"AVIATION METEOROLOGY", by:"Rinkesh Punjwani",   i:"RP", c:"#7A4A2B", d:"27 Jul 2026", n:"4 of 7 topics"  },
+  { t:"Fuel monitoring — standard fuel policy",     ch:"FUEL MONITORING",   s:"AIR NAVIGATION",       by:"Manthan Bhanushali", i:"MB", c:"#E31E24", d:"24 Jul 2026", n:"5 of 5 topics"  },
+  { t:"Altimetry — QNH, QFE, QNE settings",         ch:"ALTIMETRY",         s:"AVIATION METEOROLOGY", by:"Anjali Deshmukh",    i:"AD", c:"#0F7A45", d:"23 Jul 2026", n:"7 of 7 topics"  }
+];
+
+/* Aarav's own batch (NITTE 1st) is ahead of the academy-wide average:
+   534 of 835 topics = 64%, matching the batch row in BATCHES. */
+const MY_SUBJECTS = [
+  { short:"Air Navigation",       colour:"#E31E24", done:300, total:441 },
+  { short:"Aviation Meteorology", colour:"#F0A830", done:121, total:168 },
+  { short:"Technical General",    colour:"#7A4A2B", done: 71, total:151 },
+  { short:"Regulations",          colour:"#0F7A45", done: 42, total: 75 }
+];
+
+const LIBRARY_NEW = [
+  { t:"CAE Oxford — Radio Navigation, Vol. 2", src:"CAE Oxford",  d:"Added 30 Jul", pages:"248 pages" },
+  { t:"RK Bali — Meteorology Workbook",        src:"RK Bali",     d:"Added 29 Jul", pages:"116 pages" },
+  { t:"IC Joshi — Air Regulations Digest",     src:"IC Joshi",    d:"Added 27 Jul", pages:"92 pages"  },
+  { t:"Keith Williams — Flight Planning",      src:"Keith Williams", d:"Added 24 Jul", pages:"184 pages" }
+];
+
+/* =====================================================================
+   ICONS
+   ===================================================================== */
+const I = {
+  home:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  report:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>',
+  book:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>',
+  users:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>',
+  layers:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 10 5-10 5L2 7Z"/><path d="m2 17 10 5 10-5"/><path d="m2 12 10 5 10-5"/></svg>',
+  chart:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+  cal:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  tag:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.6 13.4 12 22l-9-9V3h10Z"/><circle cx="7.5" cy="7.5" r="1.5" fill="currentColor"/></svg>',
+  cog:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2V21a2 2 0 1 1-4 0v-.1A1.7 1.7 0 0 0 7 19.4a1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15H3a2 2 0 1 1 0-4h.1A1.7 1.7 0 0 0 4.6 7a1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 9 3V3a2 2 0 1 1 4 0v.1A1.7 1.7 0 0 0 17 4.6c.6.3 1.3.2 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9v.1a1.7 1.7 0 0 0 1.6 1h.1a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z"/></svg>',
+  clock:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>',
+  check:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  alert:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20Z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></svg>',
+  alertLg:'<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20Z"/><line x1="12" y1="10" x2="12" y2="14"/><circle cx="12" cy="17" r=".7" fill="currentColor"/></svg>',
+  clockSm:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>',
+  minus:'<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  up:'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 15 12 8 19 15"/></svg>',
+  down:'<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 9 12 16 19 9"/></svg>',
+  bell:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>',
+  plus:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  arrow:'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg>',
+  pdf:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  filter:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.5 10 19 14 21 14 12.5 22 3"/></svg>',
+  eye:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>'
+};
+
+/* =====================================================================
+   SVG CHART HELPERS
+   ===================================================================== */
+function sparkline(vals, colour, w=88, h=30){
+  const mx = Math.max(...vals), mn = Math.min(...vals), rg = (mx-mn)||1;
+  const pts = vals.map((v,i)=>[i/(vals.length-1)*w, h-2 - ((v-mn)/rg)*(h-6)]);
+  const d = pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  const area = d+` L${w} ${h} L0 ${h} Z`;
+  const id = 'g'+Math.random().toString(36).slice(2,8);
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none" aria-hidden="true">
+    <defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${colour}" stop-opacity=".22"/><stop offset="100%" stop-color="${colour}" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${area}" fill="url(#${id})"/>
+    <path d="${d}" stroke="${colour}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${pts[pts.length-1][0].toFixed(1)}" cy="${pts[pts.length-1][1].toFixed(1)}" r="2.6" fill="${colour}"/>
+  </svg>`;
+}
+
+/* Grouped bars: current week vs previous week */
+function hoursChart(cur, prev, labels, w=680, h=230){
+  const pad = {l:36, r:8, t:14, b:26};
+  const cw = w-pad.l-pad.r, chh = h-pad.t-pad.b;
+  const max = Math.ceil(Math.max(...cur, ...prev))+1;
+  const step = cw/labels.length;
+  const bw = Math.min(20, step*0.30);
+  let g='';
+  for(let i=0;i<=max;i++){
+    const y = pad.t + chh - (i/max)*chh;
+    g += `<line x1="${pad.l}" y1="${y.toFixed(1)}" x2="${w-pad.r}" y2="${y.toFixed(1)}" stroke="#F3EDE1" stroke-width="1"/>
+          <text x="${pad.l-9}" y="${(y+3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="#9A917E" font-family="Inter">${i}h</text>`;
+  }
+  let bars='';
+  labels.forEach((lb,i)=>{
+    const cx = pad.l + step*i + step/2;
+    const hC = (cur[i]/max)*chh, hP = (prev[i]/max)*chh;
+    bars += `<rect x="${(cx-bw-2).toFixed(1)}" y="${(pad.t+chh-hP).toFixed(1)}" width="${bw}" height="${Math.max(hP,1).toFixed(1)}" rx="3" fill="#EADFC6"/>`;
+    bars += `<rect x="${(cx+2).toFixed(1)}" y="${(pad.t+chh-hC).toFixed(1)}" width="${bw}" height="${Math.max(hC,1).toFixed(1)}" rx="3" fill="#E31E24" opacity=".92"/>`;
+    if(cur[i]>0) bars += `<text x="${(cx+2+bw/2).toFixed(1)}" y="${(pad.t+chh-hC-6).toFixed(1)}" text-anchor="middle" font-size="10" font-weight="700" fill="#4A3B1E" font-family="Inter">${cur[i].toFixed(1)}</text>`;
+    bars += `<text x="${cx.toFixed(1)}" y="${h-8}" text-anchor="middle" font-size="10.5" fill="#6B6153" font-weight="600" font-family="Inter">${lb}</text>`;
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img" aria-label="Teaching hours per day, this week versus last week">${g}
+    <line x1="${pad.l}" y1="${pad.t+chh}" x2="${w-pad.r}" y2="${pad.t+chh}" stroke="#DFD5C0" stroke-width="1.2"/>${bars}</svg>`;
+}
+
+/* Attendance line with dotted comparison */
+function lineChart(vals, w=560, h=170){
+  const pad={l:34,r:10,t:14,b:24}, cw=w-pad.l-pad.r, chh=h-pad.t-pad.b;
+  const mn=70, mx=100;
+  const P = vals.map((v,i)=>[pad.l+ i/(vals.length-1)*cw, pad.t+chh-((v-mn)/(mx-mn))*chh]);
+  const d = P.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  let g='';
+  [70,80,90,100].forEach(v=>{
+    const y=pad.t+chh-((v-mn)/(mx-mn))*chh;
+    g+=`<line x1="${pad.l}" y1="${y.toFixed(1)}" x2="${w-pad.r}" y2="${y.toFixed(1)}" stroke="#F3EDE1"/>
+        <text x="${pad.l-8}" y="${(y+3.5).toFixed(1)}" text-anchor="end" font-size="10" fill="#9A917E" font-family="Inter">${v}%</text>`;
+  });
+  // 75% DGCA-style threshold
+  const ty = pad.t+chh-((75-mn)/(mx-mn))*chh;
+  g += `<line x1="${pad.l}" y1="${ty.toFixed(1)}" x2="${w-pad.r}" y2="${ty.toFixed(1)}" stroke="#8E1B2E" stroke-width="1.4" stroke-dasharray="5 4" opacity=".65"/>
+        <text x="${w-pad.r}" y="${(ty-6).toFixed(1)}" text-anchor="end" font-size="9.5" font-weight="700" fill="#8E1B2E" font-family="Inter">75% minimum</text>`;
+  const pts = P.map((p,i)=>`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.4" fill="#fff" stroke="#4A3B1E" stroke-width="2"/>`).join('');
+  const lab = P.map((p,i)=>`<text x="${p[0].toFixed(1)}" y="${h-7}" text-anchor="middle" font-size="10" fill="#9A917E" font-family="Inter">W${i+1}</text>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" role="img" aria-label="Average attendance over the last eight weeks">${g}
+    <path d="${d} L${P[P.length-1][0].toFixed(1)} ${pad.t+chh} L${pad.l} ${pad.t+chh} Z" fill="#4A3B1E" opacity=".06"/>
+    <path d="${d}" stroke="#4A3B1E" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>${pts}${lab}</svg>`;
+}
+
+function ring(pct, size=104, stroke=10, colour="#E31E24", label="Complete"){
+  const r=(size-stroke)/2, c=2*Math.PI*r;
+  return `<div class="ring-wrap" style="width:${size}px;height:${size}px">
+    <svg width="${size}" height="${size}" role="img" aria-label="${pct} percent ${label}">
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="#F0EADC" stroke-width="${stroke}" fill="none"/>
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" stroke="${colour}" stroke-width="${stroke}" fill="none"
+        stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c*(1-pct/100)).toFixed(1)}"
+        stroke-linecap="round" transform="rotate(-90 ${size/2} ${size/2})"/>
+    </svg>
+    <div class="ring-txt"><b>${pct}%</b><span>${label}</span></div>
+  </div>`;
+}
+
+function miniRing(pct, colour){
+  const s=30,st=4,r=(s-st)/2,c=2*Math.PI*r;
+  return `<svg width="${s}" height="${s}" aria-hidden="true"><circle cx="15" cy="15" r="${r}" stroke="#F0EADC" stroke-width="${st}" fill="none"/>
+    <circle cx="15" cy="15" r="${r}" stroke="${colour}" stroke-width="${st}" fill="none" stroke-dasharray="${c.toFixed(1)}"
+      stroke-dashoffset="${(c*(1-pct/100)).toFixed(1)}" stroke-linecap="round" transform="rotate(-90 15 15)"/></svg>`;
+}
+
+function bar(pct, colour, thresh){
+  return `<div class="bar thick"><i style="width:${pct}%;background:${colour}"></i>${thresh?`<span class="thresh" style="left:${thresh}%"></span>`:''}</div>`;
+}
+
+const attColour = p => p>=85 ? "#0F7A45" : p>=75 ? "#F0A830" : "#8E1B2E";
+const attChip   = p => p>=85 ? `<span class="st st-ok">${I.check} On track</span>`
+                     : p>=75 ? `<span class="st st-warn">${I.alert} Watch</span>`
+                             : `<span class="st st-late">${I.alert} Below 75%</span>`;
+
+/* =====================================================================
+   NAVIGATION PER ROLE
+   ===================================================================== */
+const NAV = {
+  admin:[
+    {label:"Overview", items:[{t:"Dashboard",ic:"home",on:1},{t:"Class reports",ic:"report",pill:"3"},{t:"Progress",ic:"chart"}]},
+    {label:"Academy",  items:[{t:"Batches",ic:"layers"},{t:"Students",ic:"users"},{t:"Curriculum",ic:"book"},{t:"Library",ic:"book"},{t:"Sources",ic:"tag"}]},
+    {label:"Manage",   items:[{t:"Schedule",ic:"cal"},{t:"Settings",ic:"cog"}]}
+  ],
+  instructor:[
+    {label:"Teaching", items:[{t:"Dashboard",ic:"home",on:1},{t:"New class report",ic:"report"},{t:"My reports",ic:"report"},{t:"My batches",ic:"layers"}]},
+    {label:"Cadets",   items:[{t:"My students",ic:"users",pill:"2"},{t:"Progress",ic:"chart"}]},
+    {label:"Resources",items:[{t:"Library",ic:"book"},{t:"Curriculum",ic:"book"},{t:"Schedule",ic:"cal"}]}
+  ],
+  student:[
+    {label:"Learning", items:[{t:"Dashboard",ic:"home",on:1},{t:"My progress",ic:"chart"},{t:"Library",ic:"book",pill:"4"}]},
+    {label:"My course",items:[{t:"Schedule",ic:"cal"},{t:"Attendance",ic:"clock"},{t:"Syllabus",ic:"layers"}]}
+  ]
+};
+
+const USERS = {
+  admin:      {n:"Manthan Bhanushali", i:"MB", r:"Administrator"},
+  instructor: {n:"Rinkesh Punjwani",   i:"RP", r:"Instructor · 2 batches"},
+  student:    {n:"Aarav Mehta",        i:"AM", r:"Cadet · NITTE 1st Batch"}
+};
+
+function renderNav(role){
+  document.getElementById('sbnav').innerHTML = NAV[role].map(g=>`
+    <div class="sb-group">
+      <div class="sb-label">${g.label}</div>
+      ${g.items.map(it=>`<button class="sb-item ${it.on?'active':''}" title="${it.t}">
+        ${I[it.ic]}<span class="txt">${it.t}</span>${it.pill?`<span class="pill">${it.pill}</span>`:''}
+      </button>`).join('')}
+    </div>`).join('');
+  const u=USERS[role];
+  document.getElementById('userAv').textContent=u.i;
+  document.getElementById('userName').textContent=u.n;
+  document.getElementById('userRole').textContent=u.r;
+}
+
+/* =====================================================================
+   ADMIN DASHBOARD
+   ===================================================================== */
+function adminView(){
+  const kpis = [
+    {lab:"Class reports filed", val:"67",   unit:"", d:"+12", dir:"up",   bg:"var(--brand-050)", fg:"var(--brand)", ic:I.report, spark:[41,44,48,52,55,60,63,67], sc:"#E31E24"},
+    {lab:"Teaching hours",      val:"96:30",unit:"", d:"+8:15",dir:"up",  bg:"var(--gold-050)",  fg:"#B26A00",      ic:I.clock,  spark:[62,68,73,79,84,89,93,96], sc:"#F0A830"},
+    {lab:"Average attendance",  val:"88",   unit:"%",d:"+2.4", dir:"up",  bg:"var(--ok-bg)",     fg:"var(--ok)",    ic:I.users,  spark:ATT_TREND,                 sc:"#0F7A45"},
+    {lab:"Syllabus completion", val:"48",   unit:"%",d:"−1.1", dir:"down",bg:"var(--info-bg)",   fg:"var(--info)",  ic:I.chart,  spark:[38,40,43,45,46,48,49,48], sc:"#7A4A2B"}
+  ];
+
+  return `
+  <div class="phead">
+    <div>
+      <h1>Good afternoon, Manthan <span class="wave">👋</span></h1>
+      <div class="sub">Friday, ${TODAY} · 4 active batches · 59 cadets enrolled across 3 programmes</div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" onclick="toast('Export queued','Progress report will download as CSV.')">${I.pdf} Export</button>
+      <button class="btn btn-primary" onclick="toast('Opening report form','Step 1 of 5 · Batch')">${I.plus} New class report</button>
+    </div>
+  </div>
+
+  ${filterBar()}
+
+  <div class="grid">
+    ${kpis.map(k=>`
+      <div class="c3">
+        <div class="kpi">
+          <div class="top">
+            <div>
+              <div class="lab">${k.lab}</div>
+              <div class="val">${k.val}<small>${k.unit}</small></div>
+            </div>
+            <div class="ic" style="background:${k.bg};color:${k.fg}">${k.ic}</div>
+          </div>
+          <div class="foot">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span class="delta ${k.dir}">${k.dir==='up'?I.up:I.down}${k.d}</span>
+              <span class="vs">vs prev. 30 days</span>
+            </div>
+            ${sparkline(k.spark, k.sc)}
+          </div>
+        </div>
+      </div>`).join('')}
+
+    <!-- Hours chart -->
+    <div class="c8">
+      <div class="card">
+        <div class="card-h">
+          <div>
+            <h3>Teaching hours</h3>
+            <div class="hint">This week compared with the previous week · displayed HH:MM</div>
+          </div>
+          <div class="legend">
+            <i><span class="sw" style="background:#E31E24"></span>This week</i>
+            <i><span class="sw" style="background:#EADFC6"></span>Last week</i>
+          </div>
+        </div>
+        <div class="card-b tight">${hoursChart(HOURS_THIS,HOURS_PREV,DAYS)}</div>
+      </div>
+    </div>
+
+    <!-- Needs attention -->
+    <div class="c4">
+      <div class="card">
+        <div class="card-h">
+          <div><h3>Needs attention</h3><div class="hint">Exceptions, newest first</div></div>
+          <span class="st st-late">${I.alert} 4</span>
+        </div>
+        <div class="card-b">
+          <div class="alerts">
+            <div class="alert a-late">
+              <span class="aic" style="color:var(--late)">${I.alertLg}</span>
+              <div style="flex:1">
+                <div class="atitle">2 classes not reported</div>
+                <div class="adesc">Ground Services 02 — 29 &amp; 30 Jul. Same-day reporting is the adoption target.</div>
+                <div class="aact">
+                  <button class="mini-btn solid" onclick="toast('Reminder sent','Nudge delivered to Anjali Deshmukh.')">${I.bell} Remind instructor</button>
+                  <button class="mini-btn">View</button>
+                </div>
+              </div>
+            </div>
+            <div class="alert a-warn">
+              <span class="aic" style="color:var(--warn)">${I.alertLg}</span>
+              <div style="flex:1">
+                <div class="atitle">3 cadets below 75% attendance</div>
+                <div class="adesc">Saanvi Deshpande (63%), Kabir Sethi (68%), Vivaan Rathore (72%).</div>
+                <div class="aact"><button class="mini-btn">Review cadets</button></div>
+              </div>
+            </div>
+            <div class="alert a-warn">
+              <span class="aic" style="color:var(--warn)">${I.clock}</span>
+              <div style="flex:1">
+                <div class="atitle">Ground Services 02 is behind plan</div>
+                <div class="adesc">22% of syllabus covered against 41% scheduled for this point in the term.</div>
+                <div class="aact"><button class="mini-btn">Open batch</button></div>
+              </div>
+            </div>
+            <div class="alert a-info">
+              <span class="aic" style="color:var(--info)">${I.report}</span>
+              <div style="flex:1">
+                <div class="atitle">1 report awaiting correction</div>
+                <div class="adesc">VOR · Nitte 2nd Batch · attendance query raised by instructor. Admin-only edit, fully audited.</div>
+                <div class="aact"><button class="mini-btn">Open report</button></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Batch table -->
+    <div class="c8">
+      <div class="card">
+        <div class="card-h">
+          <div><h3>Batch delivery status</h3><div class="hint">Syllabus coverage and attendance by cohort</div></div>
+          <a class="link" href="#">All batches ${I.arrow}</a>
+        </div>
+        <div class="card-b tight">
+          <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr>
+              <th>Batch</th><th>Cadets</th><th style="min-width:180px">Syllabus</th><th style="min-width:150px">Attendance</th><th>Last class</th><th></th>
+            </tr></thead>
+            <tbody>
+              ${BATCHES.map(b=>`
+                <tr>
+                  <td><div class="nm">${b.name}</div><div class="sub">${b.prog}</div></td>
+                  <td class="num">${b.cadets}</td>
+                  <td>
+                    <div class="barline">${bar(b.syll, b.syll>=50?'#0F7A45':b.syll>=35?'#F0A830':'#8E1B2E')}<span class="n">${b.syll}%</span></div>
+                  </td>
+                  <td>
+                    <div style="display:flex;align-items:center;gap:9px">
+                      <span class="num" style="min-width:34px">${b.att}%</span>${attChip(b.att)}
+                    </div>
+                  </td>
+                  <td class="sub" style="color:var(--text-2);font-weight:500">${b.last}</td>
+                  <td style="text-align:right">
+                    <span class="rowact"><button class="mini-btn">${I.eye} Open</button></span>
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity -->
+    <div class="c4">
+      <div class="card">
+        <div class="card-h"><div><h3>Recent activity</h3><div class="hint">Audit-visible events</div></div><a class="link" href="#">All</a></div>
+        <div class="card-b">
+          <ul class="feed">
+            ${[
+              {ic:I.report,bg:"var(--brand-050)",fg:"var(--brand)",t:"<b>Manthan Bhanushali</b> filed a class report — VOR · Nitte 2nd Batch",tm:"12 minutes ago"},
+              {ic:I.users, bg:"var(--ok-bg)",   fg:"var(--ok)",   t:"<b>Rinkesh Punjwani</b> marked attendance 15 of 16 — Clouds Part II",tm:"1 hour ago"},
+              {ic:I.alertLg,bg:"var(--warn-bg)",fg:"var(--warn)", t:"Attendance corrected for <b>Aarav Mehta</b> — new audited entry, original retained",tm:"3 hours ago"},
+              {ic:I.book,  bg:"var(--info-bg)", fg:"var(--info)", t:"<b>4 documents</b> added to CAE Oxford — visible to all assigned batches",tm:"5 hours ago"},
+              {ic:I.plus,  bg:"var(--navy-050)",fg:"var(--navy)", t:"<b>Priya Malhotra</b> admitted to NITTE 1st Batch 2025-26",tm:"Yesterday, 16:20"}
+            ].map(f=>`<li><span class="fic" style="background:${f.bg};color:${f.fg}">${f.ic}</span>
+              <div><div class="ftxt">${f.t}</div><div class="ftime">${f.tm}</div></div></li>`).join('')}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Completion by subject -->
+    <div class="c6">
+      <div class="card">
+        <div class="card-h"><div><h3>Completion by subject</h3><div class="hint">Distinct topics covered · CPL Ground School</div></div></div>
+        <div class="card-b">
+          <div class="subj">
+            ${SUBJECTS.map(s=>{
+              const p=Math.round(s.done/s.total*100);
+              return `<div class="subj-row">
+                <div class="subj-top">
+                  <span class="subj-dot" style="background:${s.colour}"></span>
+                  <span class="subj-name">${s.short}</span>
+                  <span class="subj-meta"><b>${s.done}</b> of ${s.total} topics · ${s.chapters}</span>
+                </div>
+                <div class="barline">${bar(p,s.colour)}<span class="n">${p}%</span></div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance trend -->
+    <div class="c6">
+      <div class="card">
+        <div class="card-h">
+          <div><h3>Attendance trend</h3><div class="hint">Academy-wide average, last 8 weeks</div></div>
+          <span class="st st-ok">${I.up} +2.4 pts</span>
+        </div>
+        <div class="card-b tight">${lineChart(ATT_TREND)}</div>
+      </div>
+    </div>
+
+    <!-- Instructor load -->
+    <div class="c12">
+      <div class="card">
+        <div class="card-h"><div><h3>Instructor load</h3><div class="hint">Hours taught and reports filed this month</div></div></div>
+        <div class="card-b tight">
+          <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Instructor</th><th>Batches</th><th>Classes</th><th>Hours</th><th style="min-width:260px">Share of teaching load</th><th></th></tr></thead>
+            <tbody>
+              ${INSTRUCTORS.map(t=>{
+                const share=Math.round(parseFloat(t.hours)/96.5*100);
+                return `<tr>
+                  <td><div class="who"><span class="av-sm" style="background:${t.c}18;color:${t.c}">${t.i}</span><span class="nm">${t.n}</span></div></td>
+                  <td class="num">${t.batches}</td><td class="num">${t.classes}</td>
+                  <td class="num mono">${t.hours}</td>
+                  <td><div class="barline">${bar(share,t.c)}<span class="n">${share}%</span></div></td>
+                  <td style="text-align:right"><span class="rowact"><button class="mini-btn">${I.eye} Reports</button></span></td>
+                </tr>`;
+              }).join('')}
+            </tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* =====================================================================
+   INSTRUCTOR DASHBOARD
+   ===================================================================== */
+function instructorView(){
+  return `
+  <div class="phead">
+    <div>
+      <h1>Good afternoon, Rinkesh <span class="wave">👋</span></h1>
+      <div class="sub">Friday, ${TODAY} · You have 2 classes scheduled today</div>
+    </div>
+    <button class="btn btn-primary" onclick="toast('Opening report form','Step 1 of 5 · Batch')">${I.plus} New class report</button>
+  </div>
+
+  <div class="grid">
+    <!-- Hero: today -->
+    <div class="c12">
+      <div class="hero">
+        <div class="in">
+          <div class="hero-row">
+            <div>
+              <h2>Today's classes</h2>
+              <div class="lede">File each report the same day it is taught — attendance is append-only, so a late correction is always a new audited entry.</div>
+            </div>
+            <div class="hero-stats">
+              <div class="hstat"><div class="l">This month</div><div class="v">36:15</div></div>
+              <div class="hstat"><div class="l">Classes</div><div class="v">25</div></div>
+              <div class="hstat"><div class="l">Avg attendance</div><div class="v">88<small>%</small></div></div>
+              <div class="hstat"><div class="l">Cadets</div><div class="v">34</div></div>
+            </div>
+          </div>
+
+          <div class="class-strip">
+            <div class="class-row">
+              <span class="time">09:30</span>
+              <div class="cinfo">
+                <b>AVIATION METEOROLOGY · TEMPERATURE</b>
+                <span>Nitte 2nd Batch 26-27 · 16 cadets · 01:30 planned</span>
+              </div>
+              <div class="cact">
+                <span class="st st-ok">${I.check} Report filed</span>
+                <button class="btn btn-sm btn-onhero">View</button>
+              </div>
+            </div>
+            <div class="class-row">
+              <span class="time">14:00</span>
+              <div class="cinfo">
+                <b>AIR NAVIGATION · FLIGHT PLANNING · FUEL MONITORING</b>
+                <span>NITTE 1st Batch 2025-26 · 18 cadets · 01:00 planned</span>
+              </div>
+              <div class="cact">
+                <span class="st st-warn">${I.clockSm} Due today</span>
+                <button class="btn btn-sm btn-gold" onclick="toast('Opening report form','Prefilled: NITTE 1st Batch · Fuel Monitoring')">File report ${I.arrow}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My batches -->
+    <div class="c8">
+      <div class="card">
+        <div class="card-h"><div><h3>My batches</h3><div class="hint">Where each cohort stands in the syllabus</div></div><a class="link" href="#">All ${I.arrow}</a></div>
+        <div class="card-b">
+          <div class="grid" style="gap:14px">
+            ${BATCHES.slice(0,2).map(b=>`
+              <div class="c6">
+                <div style="border:1px solid var(--line);border-radius:var(--r);padding:16px;height:100%">
+                  <div style="display:flex;gap:16px;align-items:center">
+                    ${ring(b.syll, 92, 9, b.syll>=50?'#0F7A45':'#F0A830', 'Syllabus')}
+                    <div style="min-width:0">
+                      <div class="nm" style="font-size:var(--t-sm);line-height:1.35">${b.name}</div>
+                      <div class="sub" style="margin-bottom:10px">${b.prog}</div>
+                      <div class="kv" style="padding:6px 0"><span>Cadets</span><b>${b.cadets}</b></div>
+                      <div class="kv" style="padding:6px 0"><span>Attendance</span><b>${b.att}%</b></div>
+                      <div class="kv" style="padding:6px 0"><span>Last class</span><b>${b.last}</b></div>
+                    </div>
+                  </div>
+                  <div class="divider"></div>
+                  <div style="display:flex;gap:8px">
+                    <button class="mini-btn" style="flex:1">${I.eye} Progress</button>
+                    <button class="mini-btn" style="flex:1">${I.report} Reports</button>
+                  </div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upcoming & due -->
+    <div class="c4">
+      <div class="card">
+        <div class="card-h"><div><h3>Upcoming &amp; due</h3><div class="hint">Next 10 days</div></div></div>
+        <div class="card-b">
+          <div class="alerts">
+            <div class="alert a-late">
+              <span class="aic" style="color:var(--late)">${I.alertLg}</span>
+              <div style="flex:1">
+                <div class="atitle">2 cadets overdue</div>
+                <div class="adesc">Vivaan Rathore and Saanvi Deshpande missed the Radio Navigation checkpoint due 29 Jul.</div>
+                <div class="aact"><button class="mini-btn solid" onclick="toast('Reminders sent','2 cadets notified.')">${I.bell} Remind both</button></div>
+              </div>
+            </div>
+            <div class="alert a-warn">
+              <span class="aic" style="color:var(--warn)">${I.clock}</span>
+              <div style="flex:1">
+                <div class="atitle">Flight Planning checkpoint</div>
+                <div class="adesc">NITTE 1st Batch · due Tue 04 Aug 2026 · 18 cadets</div>
+              </div>
+            </div>
+            <div class="alert a-info">
+              <span class="aic" style="color:var(--info)">${I.cal}</span>
+              <div style="flex:1">
+                <div class="atitle">Meteorology chapter test</div>
+                <div class="adesc">Nitte 2nd Batch · Wed 05 Aug 2026 · Clouds &amp; Density</div>
+              </div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div class="kv"><span>Reports filed this week</span><b>6 of 7</b></div>
+          <div class="kv"><span>Hours this week</span><b class="mono">12:45</b></div>
+          <div class="kv"><span>Topics covered this week</span><b>18</b></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- My students -->
+    <div class="c12">
+      <div class="card">
+        <div class="card-h">
+          <div><h3>My students</h3><div class="hint" id="stuCount">Attendance, syllabus progress and next checkpoint per cadet</div></div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input id="fSearch" class="sel" style="padding:0 11px;min-width:170px;font-weight:500"
+                   type="search" placeholder="Search cadets…" aria-label="Search cadets" oninput="applyStudentFilter()">
+            <select class="sel" id="fBatch" aria-label="Filter by batch" onchange="applyStudentFilter()">
+              <option value="all">All my batches</option>
+              <option value="NITTE 1st Batch 2025-26">NITTE 1st Batch 2025-26</option>
+              <option value="Nitte 2nd Batch 26-27">Nitte 2nd Batch 26-27</option>
+            </select>
+            <select class="sel" id="fStatus" aria-label="Filter by status" onchange="applyStudentFilter()">
+              <option value="all">All cadets</option>
+              <option value="low">Below 75% attendance</option>
+              <option value="watch">Watch (75–84%)</option>
+              <option value="ontrack">On track (85%+)</option>
+              <option value="overdue">Overdue checkpoint</option>
+            </select>
+            <select class="sel" id="fSort" aria-label="Sort by" onchange="applyStudentFilter()">
+              <option value="name">Sort: name</option>
+              <option value="att">Sort: lowest attendance</option>
+              <option value="prog">Sort: lowest progress</option>
+            </select>
+            <button class="reset" style="margin:0" onclick="resetStudentFilter()">Reset</button>
+            <button class="btn btn-sm btn-ghost" onclick="remindFlagged()">${I.bell} Remind flagged</button>
+          </div>
+        </div>
+        <div id="stuChips" style="padding:0 18px 12px;display:flex;gap:8px;flex-wrap:wrap"></div>
+        <div class="card-b tight">
+          <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr>
+              <th>Cadet</th><th>Batch</th><th style="min-width:160px">Attendance</th>
+              <th style="min-width:180px">Syllabus progress</th><th>Next checkpoint</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody id="stuBody"></tbody>
+          </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ---- Instructor: My Students filtering ---- */
+const MY_BATCHES = ["NITTE 1st Batch 2025-26","Nitte 2nd Batch 26-27"];
+const myCadets = () => CADETS.filter(c=>MY_BATCHES.includes(c.b));
+
+function cadetRow(c){
+  return `<tr>
+    <td><div class="who"><span class="av-sm" style="background:${c.c}18;color:${c.c}">${c.i}</span><span class="nm">${c.n}</span></div></td>
+    <td class="sub" style="color:var(--text-2);font-weight:500">${c.b}</td>
+    <td><div class="barline">${bar(c.att, attColour(c.att), 75)}<span class="n">${c.att}%</span></div></td>
+    <td><div style="display:flex;align-items:center;gap:9px">
+      ${miniRing(c.prog, c.prog>=60?'#0F7A45':c.prog>=40?'#F0A830':'#8E1B2E')}
+      <span class="num">${c.prog}%</span></div></td>
+    <td>${c.dueState==='late'
+        ? `<span class="st st-late">${I.alert} Overdue ${c.due}</span>`
+        : c.dueState==='warn'
+        ? `<span class="st st-warn">${I.clockSm} ${c.due}</span>`
+        : `<span class="sub" style="color:var(--text-2);font-weight:600">${c.due} 2026</span>`}</td>
+    <td>${attChip(c.att)}</td>
+    <td style="text-align:right"><span class="rowact" style="display:inline-flex;gap:6px">
+      <button class="mini-btn" onclick="toast('Reminder sent','${c.n} has been notified.')">${I.bell} Remind</button>
+      <button class="mini-btn" title="View cadet">${I.eye}</button>
+    </span></td></tr>`;
+}
+
+const STATUS_LABEL = {low:"Below 75% attendance",watch:"Watch (75–84%)",ontrack:"On track (85%+)",overdue:"Overdue checkpoint"};
+
+function applyStudentFilter(){
+  const body=document.getElementById('stuBody'); if(!body) return;
+  const q=(document.getElementById('fSearch').value||'').trim().toLowerCase();
+  const b=document.getElementById('fBatch').value;
+  const s=document.getElementById('fStatus').value;
+  const sort=document.getElementById('fSort').value;
+  const all=myCadets();
+  let list=all.slice();
+
+  if(q) list=list.filter(c=>c.n.toLowerCase().includes(q));
+  if(b!=='all') list=list.filter(c=>c.b===b);
+  if(s==='low')     list=list.filter(c=>c.att<75);
+  if(s==='watch')   list=list.filter(c=>c.att>=75&&c.att<85);
+  if(s==='ontrack') list=list.filter(c=>c.att>=85);
+  if(s==='overdue') list=list.filter(c=>c.dueState==='late');
+
+  if(sort==='att')       list.sort((x,y)=>x.att-y.att);
+  else if(sort==='prog') list.sort((x,y)=>x.prog-y.prog);
+  else                   list.sort((x,y)=>x.n.localeCompare(y.n));
+
+  body.innerHTML = list.length
+    ? list.map(cadetRow).join('')
+    : `<tr><td colspan="7" style="padding:38px 14px;text-align:center">
+         <div style="font-size:var(--t-md);font-weight:700;color:var(--navy);font-family:'Playfair Display',serif">No cadets match these filters</div>
+         <div style="font-size:var(--t-xs);color:var(--text-2);margin-top:6px">Try widening the batch or status filter.</div>
+         <button class="mini-btn" style="margin-top:12px" onclick="resetStudentFilter()">Reset filters</button>
+       </td></tr>`;
+
+  document.getElementById('stuCount').textContent =
+    `Showing ${list.length} of ${all.length} cadets across ${b==='all'?'2 batches':'1 batch'}`;
+
+  // applied-filter chips
+  const chips=[];
+  if(q) chips.push(['Search: “'+q+'”', "document.getElementById('fSearch').value='';applyStudentFilter()"]);
+  if(b!=='all') chips.push([b, "document.getElementById('fBatch').value='all';applyStudentFilter()"]);
+  if(s!=='all') chips.push([STATUS_LABEL[s], "document.getElementById('fStatus').value='all';applyStudentFilter()"]);
+  document.getElementById('stuChips').innerHTML = chips.map(([t,fn])=>
+    `<span class="chip-applied">${t}<button aria-label="Remove filter" onclick="${fn}">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button></span>`).join('');
+}
+
+function resetStudentFilter(){
+  document.getElementById('fSearch').value='';
+  document.getElementById('fBatch').value='all';
+  document.getElementById('fStatus').value='all';
+  document.getElementById('fSort').value='name';
+  applyStudentFilter();
+  toast('Filters reset','Showing all 12 cadets in your batches.');
+}
+
+function remindFlagged(){
+  const flagged=myCadets().filter(c=>c.att<75||c.dueState==='late');
+  toast(`${flagged.length} reminders sent`, flagged.map(c=>c.n.split(' ')[0]).join(', ')+' notified.');
+}
+
+/* =====================================================================
+   STUDENT DASHBOARD
+   ===================================================================== */
+function studentView(){
+  return `
+  <div class="phead">
+    <div>
+      <h1>Welcome back, Aarav <span class="wave">👋</span></h1>
+      <div class="sub">Friday, ${TODAY} · CPL Ground School · NITTE 1st Batch 2025-26</div>
+    </div>
+    <button class="btn btn-ghost">${I.cal} My schedule</button>
+  </div>
+
+  <div class="grid">
+    <!-- Overview -->
+    <div class="c8">
+      <div class="hero">
+        <div class="in hero-row" style="align-items:center">
+          <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap">
+            <div style="background:rgba(255,255,255,.62);border:1px solid rgba(184,148,66,.30);border-radius:50%;padding:8px">
+              <svg width="104" height="104" role="img" aria-label="64 percent of syllabus complete">
+                <circle cx="52" cy="52" r="46" stroke="rgba(184,148,66,.22)" stroke-width="10" fill="none"/>
+                <circle cx="52" cy="52" r="46" stroke="#E31E24" stroke-width="10" fill="none"
+                  stroke-dasharray="289" stroke-dashoffset="104" stroke-linecap="round" transform="rotate(-90 52 52)"/>
+                <text x="52" y="50" text-anchor="middle" font-family="Playfair Display,serif" font-size="26" font-weight="700" fill="#2E2617">64%</text>
+                <text x="52" y="66" text-anchor="middle" font-family="Inter" font-size="9" font-weight="700" fill="#93803F" letter-spacing="1">SYLLABUS</text>
+              </svg>
+            </div>
+            <div>
+              <h2>CPL Ground School</h2>
+              <div class="lede" style="margin-bottom:14px">534 of 835 topics covered by your batch · 4 subjects</div>
+              <div class="hero-stats">
+                <div class="hstat"><div class="l">My attendance</div><div class="v">96<small>%</small></div></div>
+                <div class="hstat"><div class="l">Classes attended</div><div class="v">81<small>/84</small></div></div>
+                <div class="hstat"><div class="l">Hours taught</div><div class="v">118:45</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Attendance card -->
+    <div class="c4">
+      <div class="card" style="height:100%">
+        <div class="card-h"><div><h3>My attendance</h3><div class="hint">Counted over distinct classes</div></div>
+          <span class="st st-ok">${I.check} Above minimum</span></div>
+        <div class="card-b">
+          <div style="display:flex;align-items:center;gap:18px">
+            ${ring(96, 100, 10, '#0F7A45', 'Present')}
+            <div style="flex:1">
+              <div class="kv"><span>Classes held</span><b>84</b></div>
+              <div class="kv"><span>Attended</span><b>81</b></div>
+              <div class="kv"><span>Missed</span><b>3</b></div>
+            </div>
+          </div>
+          <div class="divider"></div>
+          <div style="font-size:var(--t-xs);color:var(--text-2);font-weight:600;margin-bottom:8px">Against the 75% minimum</div>
+          <div class="barline">${bar(96,'#0F7A45',75)}<span class="n">96%</span></div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:8px;display:flex;align-items:center;gap:6px">
+            <span style="width:2px;height:11px;background:var(--navy);opacity:.55;border-radius:2px;display:inline-block"></span>
+            Marker shows the 75% minimum threshold
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress by subject -->
+    <div class="c8">
+      <div class="card">
+        <div class="card-h"><div><h3>Progress by subject</h3><div class="hint">Topics covered so far in NITTE 1st Batch 2025-26</div></div>
+          <a class="link" href="#">Full syllabus ${I.arrow}</a></div>
+        <div class="card-b">
+          <div class="subj">
+            ${MY_SUBJECTS.map(s=>{
+              const p=Math.round(s.done/s.total*100);
+              return `<div class="subj-row">
+                <div class="subj-top">
+                  <span class="subj-dot" style="background:${s.colour}"></span>
+                  <span class="subj-name">${s.short}</span>
+                  <span class="subj-meta"><b>${s.done}</b> of ${s.total} topics</span>
+                </div>
+                <div class="barline">${bar(p,s.colour)}<span class="n">${p}%</span></div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- What's next -->
+    <div class="c4">
+      <div class="card" style="height:100%">
+        <div class="card-h"><div><h3>What's next</h3><div class="hint">Your upcoming commitments</div></div></div>
+        <div class="card-b">
+          <div class="alerts">
+            <div class="alert a-warn">
+              <span class="aic" style="color:var(--warn)">${I.clock}</span>
+              <div style="flex:1">
+                <div class="atitle">Flight Planning checkpoint</div>
+                <div class="adesc">Due Tue 04 Aug 2026 · 4 days away</div>
+              </div>
+            </div>
+            <div class="alert a-info">
+              <span class="aic" style="color:var(--info)">${I.cal}</span>
+              <div style="flex:1">
+                <div class="atitle">Altimetry chapter test</div>
+                <div class="adesc">Fri 07 Aug 2026 · 09:30 · Aviation Meteorology</div>
+              </div>
+            </div>
+            <div class="alert a-info">
+              <span class="aic" style="color:var(--info)">${I.cal}</span>
+              <div style="flex:1">
+                <div class="atitle">Next class — Fuel Monitoring</div>
+                <div class="adesc">Today · 14:00–15:00 · Manthan Bhanushali</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recently covered -->
+    <div class="c7">
+      <div class="card">
+        <div class="card-h"><div><h3>Recently covered</h3><div class="hint">Topics taught in your batch, and by whom</div></div>
+          <a class="link" href="#">All classes ${I.arrow}</a></div>
+        <div class="card-b">
+          <div class="tlist">
+            ${RECENT_TOPICS.map(t=>`
+              <div class="titem">
+                <span class="av-sm" style="background:${t.c}18;color:${t.c};border-radius:9px">${t.i}</span>
+                <div class="tmain" style="flex:1;min-width:0">
+                  <b>${t.t}</b>
+                  <div class="tmeta">
+                    <span class="by"><span class="av-xs" style="background:${t.c}18;color:${t.c}">${t.i}</span>${t.by}</span>
+                    <span class="sep"></span><span>${t.s}</span>
+                    <span class="sep"></span><span>${t.d}</span>
+                  </div>
+                </div>
+                <span class="st st-ok" style="flex:0 0 auto">${I.check} ${t.n}</span>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Library -->
+    <div class="c5">
+      <div class="card">
+        <div class="card-h"><div><h3>New in the library</h3><div class="hint">Material released to your batch</div></div>
+          <a class="link" href="#">Open library ${I.arrow}</a></div>
+        <div class="card-b">
+          <div class="tlist">
+            ${LIBRARY_NEW.map(l=>`
+              <div class="titem">
+                <span class="av-sm" style="background:var(--brand-050);color:var(--brand);border-radius:9px">${I.pdf}</span>
+                <div class="tmain" style="flex:1;min-width:0">
+                  <b>${l.t}</b>
+                  <div class="tmeta"><span>${l.src}</span><span class="sep"></span><span>${l.pages}</span><span class="sep"></span><span>${l.d}</span></div>
+                </div>
+                <button class="mini-btn" onclick="toast('Opening document','Secure in-app viewer · reading only')">${I.eye} Read</button>
+              </div>`).join('')}
+          </div>
+          <div class="divider"></div>
+          <div style="font-size:11px;color:var(--text-3);display:flex;gap:7px;align-items:flex-start;line-height:1.5">
+            <span style="color:var(--text-2);flex:0 0 auto;margin-top:1px">${I.alert}</span>
+            <span>Study material opens in the in-app reader. Downloading and printing are disabled by academy policy.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* =====================================================================
+   FILTER BAR
+   ===================================================================== */
+function filterBar(){
+  return `
+  <div class="filters">
+    <span class="fl-label">${I.filter} Filters</span>
+    <div class="seg" role="group" aria-label="Date range">
+      <button onclick="segPick(this)">This month</button>
+      <button class="on" onclick="segPick(this)">30 days</button>
+      <button onclick="segPick(this)">3 months</button>
+      <button onclick="segPick(this)">Custom</button>
+    </div>
+    <select class="sel" aria-label="Programme">
+      <option>All programmes</option><option>CPL Ground School</option><option>Cabin Crew</option><option>Airport Ground Services</option>
+    </select>
+    <select class="sel" aria-label="Batch">
+      <option>All batches</option>${BATCHES.map(b=>`<option>${b.name}</option>`).join('')}
+    </select>
+    <select class="sel" aria-label="Instructor">
+      <option>All instructors</option>${INSTRUCTORS.map(t=>`<option>${t.n}</option>`).join('')}
+    </select>
+    <span class="chip-applied">Last 30 days
+      <button aria-label="Remove filter"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </span>
+    <button class="reset" onclick="toast('Filters reset','Showing the last 30 days, all batches.')">Reset</button>
+  </div>`;
+}
+
+/* =====================================================================
+   BEHAVIOUR
+   ===================================================================== */
+let ROLE='admin';
+function setRole(r){
+  ROLE=r;
+  ['admin','instructor','student'].forEach(x=>document.getElementById('rb-'+x).classList.toggle('on',x===r));
+  renderNav(r);
+  const v=document.getElementById('view');
+  v.style.opacity=0;
+  setTimeout(()=>{
+    v.innerHTML = r==='admin' ? adminView() : r==='instructor' ? instructorView() : studentView();
+    if(r==='instructor') applyStudentFilter();
+    document.getElementById('pageTitle').textContent='Dashboard';
+    v.style.transition='opacity .22s ease'; v.style.opacity=1;
+    window.scrollTo({top:0,behavior:'smooth'});
+  },110);
+}
+function toggleSidebar(){ document.getElementById('app').classList.toggle('collapsed'); }
+function segPick(btn){ [...btn.parentNode.children].forEach(b=>b.classList.remove('on')); btn.classList.add('on'); }
+
+function toast(title, sub){
+  const w=document.getElementById('toasts');
+  const el=document.createElement('div');
+  el.className='toast';
+  el.innerHTML=`<span style="color:var(--ok);flex:0 0 auto">${I.check}</span><div>${title}${sub?`<span class="tsub">${sub}</span>`:''}</div>`;
+  w.appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),220)},2600);
+}
+
+setRole('admin');
+</script>
+</body>
+</html>
